@@ -2,7 +2,7 @@
 *
 * @licstart  The following is the entire license notice for the JavaScript code in this file. 
 *
-* Importer microservice of Melinda record batch import system
+* Importers for Melinda record batch import system
 *
 * Copyright (C) 2018 University Of Helsinki (The National Library Of Finland)
 *
