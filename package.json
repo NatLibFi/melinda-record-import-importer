@@ -1,6 +1,6 @@
 {
 	"name": "@natlibfi/melinda-record-import-importer",
-	"description": "Importer microservice of Melinda record batch import system",
+	"description": "Importers for Melinda record batch import system",
 	"author": {
 		"name": "The National Library of Finland"
 	},
