@@ -1,0 +1,16 @@
+{
+  "description": "Polling Melinda rest api - Bulk ERROR",
+  "correlationId": "0-0-0",
+  "requests": [
+    {
+      "method": "get",
+      "url": "/bulk/state/0-0-0",
+      "status": 200
+    },
+    {
+      "method": "get",
+      "url": "/bulk/?id=0-0-0",
+      "status": 200
+    }
+  ]
+}

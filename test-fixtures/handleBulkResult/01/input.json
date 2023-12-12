@@ -1,0 +1,24 @@
+{
+  "correlationId": "FOO",
+  "cataloger": "xxx0000",
+  "oCatalogerIn": "xxx0000",
+  "operation": "CREATE",
+  "queueItemState": "DONE",
+  "records": [
+    {
+      "recordStatus": "CREATED",
+      "databaseId": "001234567",
+      "message": "",
+      "recordMetadata": {
+        "blobSequence": "1",
+        "standardIdentifiers": [
+          "978-952-373-345-9"
+        ],
+        "sourceIds": ["(MALLI)0239734"],
+        "title": "example"
+      }
+    }
+  ],
+  "errorStatus": "",
+  "errorMessage": ""
+}
