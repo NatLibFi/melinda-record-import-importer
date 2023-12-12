@@ -15,7 +15,7 @@ async function run() {
 
   const riApiClient = createRecordImportApiClient(config.recordImportApiOptions);
   const melindaRestApiClient = createMelindaApiRecordClient(config.melindaRestApiOptions);
-  const blobImportHandler = config.importAsBulk ? bulkImportBlobHandlerFactory(riApiClient, melindaApiClient, amqplib, config) : prioImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config);
+  const blobImportHandler = config.importAsBulk ? bulkImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config) : prioImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config);
 
   await startApp(config, riApiClient, melindaRestApiClient, blobImportHandler);
 
