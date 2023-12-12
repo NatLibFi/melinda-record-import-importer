@@ -14,10 +14,10 @@ async function run() {
   registerInterruptionHandlers();
 
   const riApiClient = createRecordImportApiClient(config.recordImportApiOptions);
-  const melindaApiClient = createMelindaApiRecordClient(config.melindaApiOptions);
-  const blobImportHandler = config.importAsBulk ? bulkImportBlobHandlerFactory(riApiClient, melindaApiClient, amqplib, config) : prioImportBlobHandlerFactory(riApiClient, melindaApiClient, amqplib, config);
+  const melindaRestApiClient = createMelindaApiRecordClient(config.melindaRestApiOptions);
+  const blobImportHandler = config.importAsBulk ? bulkImportBlobHandlerFactory(riApiClient, melindaApiClient, amqplib, config) : prioImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config);
 
-  await startApp(config, riApiClient, melindaApiClient, blobImportHandler);
+  await startApp(config, riApiClient, melindaRestApiClient, blobImportHandler);
 
   function registerInterruptionHandlers() {
     process

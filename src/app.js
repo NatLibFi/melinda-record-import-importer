@@ -7,7 +7,7 @@ import createDebugLogger from 'debug';
 const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
 
-export async function startApp(config, riApiClient, melindaApiClient, blobImportHandler) {
+export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
   await logic();
 
   async function logic(wait = false) {
@@ -25,7 +25,7 @@ export async function startApp(config, riApiClient, melindaApiClient, blobImport
     if (processingInfo) {
       const {correlationId, id} = processingInfo;
       debug(`Handling ${BLOB_STATE.PROCESSING_BULK} blob ${id}, correlationId: ${correlationId}`);
-      const importResults = await pollResultHandling(melindaApiClient, id, correlationId);
+      const importResults = await pollResultHandling(melindaRestApiClient, id, correlationId);
       await handleBulkResult(riApiClient, id, importResults);
       return logic();
     }
@@ -61,7 +61,7 @@ export async function startApp(config, riApiClient, melindaApiClient, blobImport
     }
   }
 
-  async function pollResultHandling(melindaApiClient, recordImportBlobId, melindaRestApiCorrelationId) {
+  async function pollResultHandling(melindaRestApiClient, recordImportBlobId, melindaRestApiCorrelationId) {
     const finalQueueItemStates = ['DONE', 'ERROR', 'ABORT'];
     debug('Getting blob metadata');
     const metadata = await riApiClient.getBlobMetadata({id: recordImportBlobId});
@@ -74,12 +74,12 @@ export async function startApp(config, riApiClient, melindaApiClient, blobImport
 
     if (metadata.state === BLOB_STATE.ABORTED) {
       debug('Blob state is set to ABORTED. Stopping rest api');
-      await melindaApiClient.setBulkStatus(melindaRestApiCorrelationId, 'ABORT');
+      await melindaRestApiClient.setBulkStatus(melindaRestApiCorrelationId, 'ABORT');
 
       return logic();
     }
 
-    const poller = pollMelindaRestApi(melindaApiClient, melindaRestApiCorrelationId, true);
+    const poller = pollMelindaRestApi(melindaRestApiClient, melindaRestApiCorrelationId, true);
     const pollResults = await poller();
     debug(`Got pollResults ${JSON.stringify(pollResults)}`);
 
@@ -92,6 +92,6 @@ export async function startApp(config, riApiClient, melindaApiClient, blobImport
     debug(`Current Melinda rest api item status: ${pollResults.queueItemState}`);
     await setTimeoutPromise(1000);
 
-    return pollResultHandling(melindaApiClient, recordImportBlobId, melindaRestApiCorrelationId);
+    return pollResultHandling(melindaRestApiClient, recordImportBlobId, melindaRestApiCorrelationId);
   }
 }

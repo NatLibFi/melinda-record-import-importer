@@ -23,8 +23,8 @@ export const recordImportApiOptions = {
   userAgent: readEnvironmentVariable('API_CLIENT_USER_AGENT', {defaultValue: '_RECORD-IMPORT-IMPORTER'})
 };
 
-export const melindaApiOptions = {
-  melindaApiUrl: readEnvironmentVariable('MELINDA_API_URL', {defaultValue: 'MELINDA_API_URL env is not set!'}),
-  melindaApiUsername: readEnvironmentVariable('MELINDA_API_USERNAME', {defaultValue: ''}),
-  melindaApiPassword: readEnvironmentVariable('MELINDA_API_PASSWORD', {defaultValue: ''})
+export const melindaRestApiOptions = {
+  melindaApiUrl: readEnvironmentVariable('MELINDA_REST_API_URL', {defaultValue: 'MELINDA_REST_API_URL env is not set!'}),
+  melindaApiUsername: readEnvironmentVariable('MELINDA_REST_API_USERNAME', {defaultValue: ''}),
+  melindaApiPassword: readEnvironmentVariable('MELINDA_REST_API_PASSWORD', {defaultValue: ''})
 };
