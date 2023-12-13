@@ -42,7 +42,8 @@
 		"@natlibfi/melinda-rest-api-client": "^4.0.2",
 		"@natlibfi/melinda-rest-api-commons": "^4.0.11",
 		"amqplib": "^0.10.3",
-		"http-status": "^1.6.2"
+		"http-status": "^1.6.2",
+		"pretty-print-ms": "^1.0.5"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.22.10",

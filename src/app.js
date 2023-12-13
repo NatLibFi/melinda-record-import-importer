@@ -3,6 +3,7 @@ import {promisify} from 'util';
 import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 import {handleBulkResult} from './handleBulkResult';
 import createDebugLogger from 'debug';
+import prettyPrint from 'pretty-print-ms';
 
 const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
@@ -12,7 +13,6 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
 
   async function logic(wait = false, waitSinceLastOp = 0) {
     if (wait) {
-      debug(`Await ${polltime / 1000} sec`);
       await setTimeoutPromise(3000);
       const nowWaited = parseInt(3000, 10) + parseInt(waitSinceLastOp, 10);
       logWait(nowWaited);
