@@ -1,0 +1,28 @@
+{
+  "description": "Handle INVALID record data",
+  "requests": [
+    {
+      "method": "post",
+      "url": "/auth",
+      "status": 204,
+      "responseHeaders":{
+        "Token": "0-0-0"
+      }
+    },
+    {
+      "method": "get",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    }
+  ]
+}

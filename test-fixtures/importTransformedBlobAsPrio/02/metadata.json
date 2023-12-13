@@ -1,0 +1,75 @@
+{
+  "description": "Handle transformed blob - Importing, 2 CREATE messages",
+  "configs": {
+    "blobId": "000",
+    "profileId": "foobar",
+    "profileToCataloger": "{\"foobar\": \"foobar\"}",
+    "amqpUrl": "amqp://foo.bar/",
+    "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
+    "logLevel": "info",
+    "noopProcessing": false,
+    "noopMelindaImport": false,
+    "uniqueMelindaImport": true
+  },
+  "requests": [
+    {
+      "step": "Auth user",
+      "response": "01",
+      "method": "post",
+      "url": "/auth",
+      "status": 204,
+      "responseHeaders":{
+        "Token": "0-0-0"
+      }
+    },
+    {
+      "step": "get blob metadata for state === not aborted",
+      "response": "02",
+      "method": "get",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "step": "post record to rest api",
+      "response": "03",
+      "method": "post",
+      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
+      "status": 201
+    },
+    {
+      "step": "post record blob",
+      "response": "04",
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "step": "get blob metadata for state === not aborted",
+      "response": "05",
+      "method": "get",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "step": "post record to rest api",
+      "response": "06",
+      "method": "post",
+      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
+      "status": 201
+    },
+    {
+      "step": "post record blob",
+      "response": "07",
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "step": "post blob state update PROCESSED",
+      "response": "08",
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    }
+  ]
+}

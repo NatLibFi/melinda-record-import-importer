@@ -1,0 +1,96 @@
+{
+  "description": "Handle transformed blob - WAITING_FOR_RECORDS to PENDING_VALIDATION, 2 messages",
+  "configs": {
+    "blobId": "000",
+    "profileId": "foobar",
+    "profileToCataloger": "{\"foobar\": \"foobar\"}",
+    "amqpUrl": "amqp://foo.bar/",
+    "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
+    "logLevel": "info",
+    "noopProcessing": false,
+    "noopMelindaImport": false,
+    "uniqueMelindaImport": true
+  },
+  "requests": [
+    {
+      "step": "Auth user",
+      "response": "01",
+      "method": "post",
+      "url": "/auth",
+      "status": 204,
+      "responseHeaders":{
+        "Token": "0-0-0"
+      }
+    },
+    {
+      "step": "get blob metadata for correlation id",
+      "response": "02",
+      "method": "get",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "step": "get bulk state with correlation id",
+      "response": "03",
+      "method": "get",
+      "url": "/bulk/state/0-0-0",
+      "status": 200
+    },
+    {
+      "step": "get blob metadata for state === not aborted",
+      "response": "04",
+      "method": "get",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "step": "POST record to rest-api",
+      "response": "05",
+      "method": "post",
+      "url": "/bulk/record/0-0-0",
+      "status": 200
+    },
+    {
+      "step": "POST queued record to record-import",
+      "response": "06",
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "step": "get blob metadata for state === not aborted",
+      "response": "07",
+      "method": "get",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "step": "POST record to rest-api",
+      "response": "08",
+      "method": "post",
+      "url": "/bulk/record/0-0-0",
+      "status": 200
+    },
+    {
+      "step": "POST queued record to record-import",
+      "response": "09",
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "step": "put bulk state PENDING_VALIDATION",
+      "response": "10",
+      "method": "put",
+      "url": "/bulk/state/0-0-0?status=PENDING_VALIDATION",
+      "status": 200
+    },
+    {
+      "step": "post blob state update PROCESSING_BULK",
+      "response": "11",
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "databaseId": "000000001",
+  "recordMetadata": {
+    "sourceIds": [
+      "(FI-MELINDA)000000001"
+    ],
+    "blobSequence": "1",
+    "title": "Malli title :",
+    "standardIdentifiers": ["978-952-11-0000-0"]
+  },
+  "recordStatus": "UPDATED",
+  "message": "Updated record 000000001"
+}

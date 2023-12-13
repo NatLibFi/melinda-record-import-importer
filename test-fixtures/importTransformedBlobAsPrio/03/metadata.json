@@ -1,0 +1,69 @@
+{
+  "description": "Handle transformed blob - Importing, 2 UPDATE messages",
+  "configs": {
+    "blobId": "000",
+    "profileId": "foobar",
+    "profileToCataloger": "{\"foobar\": \"foobar\"}",
+    "amqpUrl": "amqp://foo.bar/",
+    "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
+    "logLevel": "info",
+    "noopProcessing": false,
+    "noopMelindaImport": false,
+    "uniqueMelindaImport": true
+  },
+  "requests": [
+    {
+      "method": "post",
+      "response": "01",
+      "url": "/auth",
+      "status": 204,
+      "responseHeaders":{
+        "Token": "0-0-0"
+      }
+    },
+    {
+      "method": "get",
+      "response": "02",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "method": "post",
+      "response": "03",
+      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
+      "status": 200,
+      "responseHeaders": {"Record-ID": "000000001"}
+    },
+    {
+      "method": "post",
+      "response": "04",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "method": "get",
+      "response": "05",
+      "url": "/blobs/000",
+      "status": 200
+    },
+    {
+      "method": "post",
+      "response": "06",
+      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
+      "status": 200,
+      "responseHeaders": {"Record-ID": "000000002"}
+    },
+    {
+      "method": "post",
+      "response": "07",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "method": "post",
+      "response": "08",
+      "url": "/blobs/000",
+      "status": 204
+    }
+  ]
+}

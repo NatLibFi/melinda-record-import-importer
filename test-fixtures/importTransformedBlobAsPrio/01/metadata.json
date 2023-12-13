@@ -1,0 +1,31 @@
+{
+  "description": "Handle transformed blob - PROCESSING to PROCESSED, no messages",
+  "configs": {
+    "blobId": "000",
+    "profileId": "foobar",
+    "profileToCataloger": "{\"foobar\": \"foobar\"}",
+    "amqpUrl": "amqp://foo.bar/",
+    "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
+    "logLevel": "info",
+    "noopProcessing": false,
+    "noopMelindaImport": false,
+    "uniqueMelindaImport": true
+  },
+  "requests": [
+    {
+      "step": "Auth user",
+      "method": "post",
+      "url": "/auth",
+      "status": 204,
+      "responseHeaders":{
+        "Token": "0-0-0"
+      }
+    },
+    {
+      "step": "post blob state update PROCESSED",
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 204
+    }
+  ]
+}
