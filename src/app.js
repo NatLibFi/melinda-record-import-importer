@@ -10,19 +10,22 @@ const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startA
 export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
   await logic();
 
-  async function logic(wait = false) {
+  async function logic(wait = false, waitSinceLastOp = 0) {
     if (wait) {
+      debug(`Await ${polltime / 1000} sec`);
       await setTimeoutPromise(3000);
-      return logic();
+      const nowWaited = parseInt(3000, 10) + parseInt(waitSinceLastOp, 10);
+      logWait(nowWaited);
+      return logic(false, nowWaited);
     }
 
     const {profileIds, importOfflinePeriod, importAsBulk} = config;
 
     // Check if blobs
-    debug(`Trying to find blobs for ${profileIds}`); // eslint-disable-line
+    // debug(`Trying to find blobs for ${profileIds}`); // eslint-disable-line
     const processingInfo = importAsBulk ? await processBlobState(profileIds, BLOB_STATE.PROCESSING_BULK, importOfflinePeriod) : false;
-    debug(`${JSON.stringify(processingInfo)}`);
     if (processingInfo) {
+      debug(`Found blob in state PROCESSING_BULK: ${JSON.stringify(processingInfo)}`);
       const {correlationId, id} = processingInfo;
       debug(`Handling ${BLOB_STATE.PROCESSING_BULK} blob ${id}, correlationId: ${correlationId}`);
       const importResults = await pollResultHandling(melindaRestApiClient, id, correlationId);
@@ -31,8 +34,8 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
     }
 
     const processingQueueBlobInfo = await processBlobState(profileIds, BLOB_STATE.PROCESSING, importOfflinePeriod);
-    debug(`${JSON.stringify(processingQueueBlobInfo)}`);
     if (processingQueueBlobInfo) {
+      debug(`Found blob in state PROCESSING: ${JSON.stringify(processingQueueBlobInfo)}`);
       const {id} = processingQueueBlobInfo;
       debug(`Queuing to bulk blob ${id}`);
       await blobImportHandler.startHandling(id);
@@ -40,15 +43,15 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
     }
 
     const transformedBlobInfo = await processBlobState(profileIds, BLOB_STATE.TRANSFORMED, importOfflinePeriod);
-    debug(`${JSON.stringify(transformedBlobInfo)}`);
     if (transformedBlobInfo) {
+      debug(`Found blob in state TRANSFORMED: ${JSON.stringify(transformedBlobInfo)}`);
       const {id} = transformedBlobInfo;
       debug(`Start handling blob ${id}`);
       await riApiClient.updateState({id, state: BLOB_STATE.PROCESSING});
       return logic();
     }
 
-    return logic(true);
+    return logic(true, waitSinceLastOp);
 
     async function processBlobState(profileIds, state, importOfflinePeriod) {
       const blobInfo = await getNextBlobId(riApiClient, {profileIds, state, importOfflinePeriod});
@@ -56,7 +59,7 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
         return blobInfo;
       }
 
-      debug(`No blobs in ${state} found for ${profileIds}`);
+      // debug(`No blobs in ${state} found for ${profileIds}`);
       return false;
     }
   }
@@ -93,5 +96,12 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
     await setTimeoutPromise(1000);
 
     return pollResultHandling(melindaRestApiClient, recordImportBlobId, melindaRestApiCorrelationId);
+  }
+
+  function logWait(waitTime) {
+    // 60000ms = 1min
+    if (waitTime % 60000 === 0) {
+      return debug(`Total wait: ${prettyPrint(waitTime)}`);
+    }
   }
 }
