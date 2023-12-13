@@ -58,15 +58,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test webhook
+      - name: Test webhook - test branch
         uses: joelwmale/webhook-action@master
         if: github.ref == 'refs/heads/test'
         with:
-          url: ${{ secrets.WEBHOOK_URL_TEST }}
+          url: ${{ secrets.WEBHOOK_URL_TEST_TEST }}
+          body: '{}'
+      - name: Test webhook - main branch
+        uses: joelwmale/webhook-action@master
+        if: github.ref == 'refs/heads/main'
+        with:
+          url: ${{ secrets.WEBHOOK_URL_TEST_MAIN }}
           body: '{}'
       - name: Prod webhook
         uses: joelwmale/webhook-action@master
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         with:
           url: ${{ secrets.WEBHOOK_URL_PROD }}
           body: '{}'
