@@ -39,7 +39,7 @@
 		"@natlibfi/melinda-backend-commons": "^2.2.1",
 		"@natlibfi/melinda-commons": "^13.0.6",
 		"@natlibfi/melinda-record-import-commons": "^10.2.1",
-		"@natlibfi/melinda-rest-api-client": "^5.0.0",
+		"@natlibfi/melinda-rest-api-client": "^4.0.3",
 		"@natlibfi/melinda-rest-api-commons": "^4.0.11",
 		"amqplib": "^0.10.3",
 		"http-status": "^1.6.2",
