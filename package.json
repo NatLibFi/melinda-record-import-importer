@@ -22,16 +22,18 @@
 	"scripts": {
 		"start": "node dist/index.js",
 		"cli": "node dist/cli.js",
-		"lint": "eslint src",
-		"lint:dev": "eslint --fix src",
-		"test": "npm run lint && npm run test:base -- src/*.spec.js",
-		"test:base": "cross-env NODE_ENV=test nyc mocha --require @babel/register",
-		"_test": "npm run lint && npm run test:base -- src/*.spec.js && npm run coverage",
-		"_test:dev": "npm run lint:dev && npm run test:base -- src/*.spec.js && npm run coverage",
+		"lint": "eslint ./src",
+		"lint:dev": "eslint --fix ./src",
+		"test": "npm run lint && npm run test:base",
+		"test:base": "cross-env NODE_ENV=test nyc mocha",
+		"_test": "npm run lint && npm run test:base",
+		"_test:dev": "npm run lint:dev && npm run test:base && npm run coverage",
 		"coverage": "nyc check-coverage --per-file",
 		"build": "babel src --source-maps --copy-files --delete-dir-on-start --out-dir=dist",
-		"watch:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test nodemon -w src --exec 'npm run test:dev'",
-		"dev": "cross-env DEBUG=@natlibfi/* nodemon -w src --exec 'babel-node src/index.js'"
+		"watch:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test nodemon",
+		"dev": "cross-env NODE_ENV=test nodemon",
+		"dev:debug": "cross-env NODE_ENV=test DEBUG=@natlibfi/* nodemon"
+
 	},
 	"dependencies": {
 		"@babel/runtime": "^7.22.11",
@@ -87,16 +89,33 @@
 			}
 		}
 	},
-	"nyc": {
-		"exclude": [
-			"*/*.spec.js"
-		],
-		"reporter": [
-			"lcov",
-			"html"
+	"mocha": {
+		"spec": [
+			"src/*.spec.js",
+			"src/**/*.spec.js"
 		],
 		"require": [
 			"@babel/register"
+		],
+		"inline-diffs": true,
+		"maxDiffSize": 25000,
+		"bail": true,
+		"exit": true
+	},
+	"nodemonConfig": {
+		"exec": "npm run _test:dev",
+		"watch": [
+			"src/*",
+			"test-fixtures/*"
+		]
+	},
+	"nyc": {
+		"exclude": [
+			"src/*.spec.js",
+			"src/**/*.spec.js"
+		],
+		"reporter": [
+			"text"
 		],
 		"sourceMap": false,
 		"instrument": false,
@@ -106,3 +125,4 @@
 		"branches": 80
 	}
 }
+
