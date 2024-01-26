@@ -30,7 +30,9 @@
 import {BLOB_STATE} from '@natlibfi/melinda-record-import-commons';
 import {recordDataBuilder} from './utils';
 import createDebugLogger from 'debug';
+import {promisify} from 'util';
 
+const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults');
 
 export async function handleBulkResult(riApiClient, blobId, bulkImportResults) {
@@ -66,12 +68,14 @@ export async function handleBulkResult(riApiClient, blobId, bulkImportResults) {
     // To be done remove queued item from blob
 
     if (importResults.some(result => result.status === recordData.status && result.metadata.title === recordData.metadata.title)) {
+      await setTimeoutPromise(2);
       return processRecordData(rest, handledRecords);
     }
 
     debug(`Record data: ${JSON.stringify(recordData)}`);
 
     await riApiClient.setRecordProcessed({id: blobId, ...recordData});
+    await setTimeoutPromise(2);
     return processRecordData(rest, [...handledRecords, recordData]);
   }
 }
