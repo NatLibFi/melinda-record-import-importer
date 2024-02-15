@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-record-import-importer.git"
 	},
 	"license": "MIT",
-	"version": "1.0.5-alpha.7",
+	"version": "1.0.6-alpha.1",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -41,7 +41,7 @@
 		"@natlibfi/melinda-commons": "^13.0.12",
 		"@natlibfi/melinda-record-import-commons": "^10.2.2",
 		"@natlibfi/melinda-rest-api-client": "^4.0.3",
-		"@natlibfi/melinda-rest-api-commons": "^4.1.1",
+		"@natlibfi/melinda-rest-api-commons": "^4.1.2-alpha.1",
 		"amqplib": "^0.10.3",
 		"http-status": "^1.7.3",
 		"pretty-print-ms": "^1.0.5"
