@@ -4,11 +4,14 @@ import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 import {handleBulkResult} from './handleBulkResult';
 import createDebugLogger from 'debug';
 import prettyPrint from 'pretty-print-ms';
+import {parseBlobInfo} from './utils';
+import {createWebhookOperator} from '@natlibfi/melinda-backend-commons';
 
-const setTimeoutPromise = promisify(setTimeout);
-const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
 
 export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
+  const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
+  const setTimeoutPromise = promisify(setTimeout);
+  const webhookOperator = createWebhookOperator(config.notifications.url);
   await logic();
 
   async function logic(wait = false, waitSinceLastOp = 0) {
@@ -30,6 +33,11 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       debug(`Handling ${BLOB_STATE.PROCESSING_BULK} blob ${id}, correlationId: ${correlationId}`);
       const importResults = await pollResultHandling(melindaRestApiClient, id, correlationId);
       await handleBulkResult(riApiClient, id, importResults);
+
+      const blobInfo = await riApiClient.getBlobMetadata({id});
+      const parsedBlobInfo = parseBlobInfo(blobInfo);
+      webhookOperator.sendNotification(parsedBlobInfo, config.notifications);
+
       return logic();
     }
 
