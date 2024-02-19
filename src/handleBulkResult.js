@@ -49,16 +49,17 @@ export async function handleBulkResult(riApiClient, blobId, bulkImportResults) {
   }
 
   debug('handleBulkresult Processing records');
-  await processRecordData(bulkImportResults.records);
+  const records = await processRecordData(bulkImportResults.records);
 
   await riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSED});
-  return true;
+  return records;
 
   async function processRecordData(recordsData, handledRecords = []) {
     const [record, ...rest] = recordsData;
 
     if (record === undefined) {
-      return;
+      // records are returned for tests!
+      return handledRecords;
     }
 
     const recordData = recordDataBuilder(record);
