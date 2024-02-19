@@ -11,7 +11,8 @@ import {createWebhookOperator} from '@natlibfi/melinda-backend-commons';
 export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
   const setTimeoutPromise = promisify(setTimeout);
-  const webhookOperator = createWebhookOperator(config.notifications.url);
+  const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
+  const webhookAlertOperator = createWebhookOperator(config.notifications.alertUrl);
   await logic();
 
   async function logic(wait = false, waitSinceLastOp = 0) {
@@ -32,11 +33,15 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       const {correlationId, id} = processingInfo;
       debug(`Handling ${BLOB_STATE.PROCESSING_BULK} blob ${id}, correlationId: ${correlationId}`);
       const importResults = await pollResultHandling(melindaRestApiClient, id, correlationId);
-      await handleBulkResult(riApiClient, id, importResults);
+      const recordsSet = await handleBulkResult(riApiClient, id, importResults);
+
+      if (!recordsSet) {
+        webhookAlertOperator.sendNotification({text: `Rest-api queue item state: ${importResults.queueItemState}, id: ${recordImportBlobId}, correlationId: ${melindaRestApiCorrelationId}`});
+      }
 
       const blobInfo = await riApiClient.getBlobMetadata({id});
       const parsedBlobInfo = parseBlobInfo(blobInfo);
-      webhookOperator.sendNotification(parsedBlobInfo, config.notifications);
+      webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
 
       return logic();
     }
@@ -85,6 +90,8 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
 
     if (metadata.state === BLOB_STATE.ABORTED) {
       debug('Blob state is set to ABORTED. Stopping rest api');
+      webhookAlertOperator.sendNotification({text: `Record-Import ABORTED id: ${recordImportBlobId}, correlationId: ${melindaRestApiCorrelationId}`});
+
       await melindaRestApiClient.setBulkStatus(melindaRestApiCorrelationId, 'ABORT');
 
       return logic();

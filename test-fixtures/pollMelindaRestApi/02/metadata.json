@@ -1,5 +1,7 @@
 {
   "description": "Polling Melinda rest api - Bulk ERROR",
+  "only": false,
+  "skip": false,
   "correlationId": "0-0-0",
   "requests": [
     {

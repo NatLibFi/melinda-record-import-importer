@@ -1,11 +1,13 @@
 {
   "description": "Handle UPDATED record data",
+  "only": false,
+  "skip": false,
   "requests": [
     {
       "method": "post",
       "url": "/auth",
       "status": 204,
-      "responseHeaders":{
+      "responseHeaders": {
         "Token": "0-0-0"
       }
     },

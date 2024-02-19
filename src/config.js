@@ -30,8 +30,8 @@ export const melindaRestApiOptions = {
 };
 
 export const notifications = {
-  url: readEnvironmentVariable('NOTIFICATION_URL', {defaultValue: false}),
-  template: readEnvironmentVariable('NOTIFICATION_TEMPLATE', {defaultValue: 'blob'}),
+  statusUrl: readEnvironmentVariable('NOTIFICATION_STATUS_URL', {defaultValue: 'test'}),
+  alertUrl: readEnvironmentVariable('NOTIFICATION_ALERT_URL', {defaultValue: 'test'}),
   environment: readEnvironmentVariable('NOTIFICATION_ENVIRONMENT', {defaultValue: 'TEST'}),
-  baseUrl: readEnvironmentVariable('NOTIFICATION_LINK_URL', {defaultValue: ''})
+  linkUrl: readEnvironmentVariable('NOTIFICATION_LINK_URL', {defaultValue: ''})
 };

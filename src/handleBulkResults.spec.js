@@ -22,12 +22,7 @@ generateTests({
   }
 });
 
-async function callback({getFixture, enabled = true}) {
-  if (enabled === false) {
-    debug('TEST SKIPPED!');
-    return;
-  }
-
+async function callback({getFixture}) {
   const importResults = getFixture('input.json');
   const expectedResults = getFixture('output.json');
   // debug(importResults);
