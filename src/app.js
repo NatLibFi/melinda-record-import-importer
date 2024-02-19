@@ -36,7 +36,8 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       const recordsSet = await handleBulkResult(riApiClient, id, importResults);
 
       if (!recordsSet) {
-        webhookAlertOperator.sendNotification({text: `Rest-api queue item state: ${importResults.queueItemState}, id: ${recordImportBlobId}, correlationId: ${melindaRestApiCorrelationId}`});
+        webhookAlertOperator.sendNotification({text: `Rest-api queue item state: ${importResults.queueItemState}, id: ${id}, correlationId: ${correlationId}`});
+        return logic();
       }
 
       const blobInfo = await riApiClient.getBlobMetadata({id});
