@@ -38,21 +38,18 @@ const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handle
 export async function handleBulkResult(riApiClient, blobId, bulkImportResults) {
   debug('handleBulkresult Begun');
 
-  const {processingInfo} = await riApiClient.getBlobMetadata({id: blobId});
-  const {importResults} = processingInfo;
-
   if (bulkImportResults.records === undefined) {
     await riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSED});
-    return [];
+    return false;
+  }
+
+  if (bulkImportResults.queueItemState === 'ERROR' || bulkImportResults.queueItemState === 'ABORT') {
+    await riApiClient.setAborted({id: blobId});
+    return false;
   }
 
   debug('handleBulkresult Processing records');
   const records = await processRecordData(bulkImportResults.records);
-
-  if (importResults.queueItemState === 'ERROR') {
-    await riApiClient.setAborted({id: blobId});
-    return records;
-  }
 
   await riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSED});
   return records;
@@ -61,16 +58,12 @@ export async function handleBulkResult(riApiClient, blobId, bulkImportResults) {
     const [record, ...rest] = recordsData;
 
     if (record === undefined) {
+      // records are returned for tests!
       return handledRecords;
     }
 
     const recordData = recordDataBuilder(record);
     // To be done remove queued item from blob
-
-    if (importResults.some(result => result.status === recordData.status && result.metadata.title === recordData.metadata.title)) {
-      await setTimeoutPromise(2);
-      return processRecordData(rest, handledRecords);
-    }
 
     debug(`Record data: ${JSON.stringify(recordData)}`);
 

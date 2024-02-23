@@ -28,3 +28,10 @@ export const melindaRestApiOptions = {
   melindaApiUsername: readEnvironmentVariable('MELINDA_REST_API_USERNAME', {defaultValue: ''}),
   melindaApiPassword: readEnvironmentVariable('MELINDA_REST_API_PASSWORD', {defaultValue: ''})
 };
+
+export const notifications = {
+  statusUrl: readEnvironmentVariable('NOTIFICATION_STATUS_URL', {defaultValue: 'test'}),
+  alertUrl: readEnvironmentVariable('NOTIFICATION_ALERT_URL', {defaultValue: 'test'}),
+  environment: readEnvironmentVariable('NOTIFICATION_ENVIRONMENT', {defaultValue: 'TEST'}),
+  linkUrl: readEnvironmentVariable('NOTIFICATION_LINK_URL', {defaultValue: ''})
+};

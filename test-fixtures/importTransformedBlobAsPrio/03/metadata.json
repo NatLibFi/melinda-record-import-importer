@@ -1,5 +1,7 @@
 {
   "description": "Handle transformed blob - Importing, 2 UPDATE messages",
+  "only": false,
+  "skip": false,
   "configs": {
     "blobId": "000",
     "profileId": "foobar",
@@ -17,7 +19,7 @@
       "response": "01",
       "url": "/auth",
       "status": 204,
-      "responseHeaders":{
+      "responseHeaders": {
         "Token": "0-0-0"
       }
     },
@@ -32,7 +34,9 @@
       "response": "03",
       "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
       "status": 200,
-      "responseHeaders": {"Record-ID": "000000001"}
+      "responseHeaders": {
+        "Record-ID": "000000001"
+      }
     },
     {
       "method": "post",
@@ -51,7 +55,9 @@
       "response": "06",
       "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
       "status": 200,
-      "responseHeaders": {"Record-ID": "000000002"}
+      "responseHeaders": {
+        "Record-ID": "000000002"
+      }
     },
     {
       "method": "post",

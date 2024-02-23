@@ -20,3 +20,17 @@ export function recordDataBuilder(result) {
 
   return {status: recordStatus, metadata};
 }
+
+export function parseBlobInfo(data) {
+  const {id, correlationId, profile, state, processingInfo} = data;
+  const {numberOfRecords = 0, failedRecords = [], importResults = []} = processingInfo;
+  const created = importResults.filter(result => result.status === 'CREATED').length;
+  const updated = importResults.filter(result => result.status === 'UPDATED').length;
+  const skipped = importResults.filter(result => result.status === 'SKIPPED').length;
+  const error = importResults.filter(result => result.status === 'ERROR').length;
+
+  return {
+    id, correlationId, profile, state, numberOfRecords, failedRecords: failedRecords.length, processedRecords: importResults.length,
+    created, updated, skipped, error
+  };
+}

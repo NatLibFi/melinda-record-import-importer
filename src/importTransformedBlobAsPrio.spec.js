@@ -44,12 +44,7 @@ generateTests({
   }
 });
 
-async function callback({getFixture, enabled = true, configs}) {
-  if (enabled === false) {
-    debug('TEST SKIPPED!');
-    return;
-  }
-
+async function callback({getFixture, configs}) {
   // Messages to AMQP queue
   const messages = getFixture('messages.json');
   if (messages.length > 0) { // eslint-disable-line functional/no-conditional-statements

@@ -1,6 +1,7 @@
 {
   "description": "Handle transformed blob - WAITING_FOR_RECORDS to PROCESSED, no messages",
   "only": false,
+  "skip": false,
   "configs": {
     "blobId": "000",
     "profileId": "foobar",
@@ -19,7 +20,7 @@
       "method": "post",
       "url": "/auth",
       "status": 204,
-      "responseHeaders":{
+      "responseHeaders": {
         "Token": "0-0-0"
       }
     },
