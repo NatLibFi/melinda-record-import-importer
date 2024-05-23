@@ -6,12 +6,12 @@ import {createApiClient} from '@natlibfi/melinda-record-import-commons';
 
 // import createDebugLogger from 'debug';
 // const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults:test');
-
-const client = createApiClient({
+const keycloakOptions = {test: true};
+const recordImportApiOptions = {
   recordImportApiUrl: 'http://foo.bar',
-  recordImportApiUsername: 'foo',
-  recordImportApiPassword: 'bar'
-});
+  userAgent: 'test',
+  allowSelfSignedApiCert: true
+};
 
 generateTests({
   callback,
@@ -24,12 +24,13 @@ generateTests({
 });
 
 async function callback({getFixture}) {
+  const riApiClient = await createApiClient(recordImportApiOptions, keycloakOptions);
   const importResults = getFixture('input.json');
   const expectedResults = getFixture('output.json');
   // debug(importResults);
   // debug(expectedResults);
 
-  const handledRecords = await handleBulkResult(client, '000', importResults);
+  const handledRecords = await handleBulkResult(riApiClient, '000', importResults);
   // debug(handledRecords);
   expect(handledRecords).to.deep.equal(expectedResults);
 }

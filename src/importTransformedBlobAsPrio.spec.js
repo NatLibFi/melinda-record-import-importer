@@ -7,11 +7,12 @@ import {closeAmqpResources, createApiClient as createRecordImportApiClient} from
 import {createMelindaApiRecordClient} from '@natlibfi/melinda-rest-api-client';
 
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importTransformedBlobAsPrio:test');
-const riApiClient = createRecordImportApiClient({
+const keycloakOptions = {test: true};
+const recordImportApiOptions = {
   recordImportApiUrl: 'http://foo.bar',
-  recordImportApiUsername: 'foo',
-  recordImportApiPassword: 'bar'
-});
+  userAgent: 'test',
+  allowSelfSignedApiCert: true
+};
 
 const melindaApiClient = createMelindaApiRecordClient({
   melindaApiUrl: 'http://foo.bar/',
@@ -45,6 +46,8 @@ generateTests({
 });
 
 async function callback({getFixture, configs}) {
+  const riApiClient = await createRecordImportApiClient(recordImportApiOptions, keycloakOptions);
+
   // Messages to AMQP queue
   const messages = getFixture('messages.json');
   if (messages.length > 0) { // eslint-disable-line functional/no-conditional-statements

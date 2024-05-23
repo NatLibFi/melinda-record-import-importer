@@ -27,7 +27,7 @@
     {
       "step": "update blob to PROCESSED",
       "response": "02",
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     }

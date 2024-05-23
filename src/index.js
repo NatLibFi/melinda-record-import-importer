@@ -13,7 +13,7 @@ run();
 async function run() {
   registerInterruptionHandlers();
 
-  const riApiClient = createRecordImportApiClient(config.recordImportApiOptions);
+  const riApiClient = await createRecordImportApiClient(config.recordImportApiOptions, config.keycloakOptions);
   const melindaRestApiClient = createMelindaApiRecordClient(config.melindaRestApiOptions);
   const blobImportHandler = config.importAsBulk ? bulkImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config) : prioImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config);
 

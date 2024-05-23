@@ -17,12 +17,12 @@
       "status": 200
     },
     {
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     },
     {
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     }

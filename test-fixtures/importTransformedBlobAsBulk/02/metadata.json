@@ -53,9 +53,9 @@
       "status": 200
     },
     {
-      "step": "POST queued record to record-import",
+      "step": "PUT queued record to record-import",
       "response": "06",
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     },
@@ -74,9 +74,9 @@
       "status": 200
     },
     {
-      "step": "POST queued record to record-import",
+      "step": "PUT queued record to record-import",
       "response": "09",
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     },
@@ -90,7 +90,7 @@
     {
       "step": "post blob state update PROCESSING_BULK",
       "response": "11",
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     }
