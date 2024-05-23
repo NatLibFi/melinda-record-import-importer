@@ -24,8 +24,8 @@
       }
     },
     {
-      "step": "post blob state update PROCESSED",
-      "method": "post",
+      "step": "put blob state update PROCESSED",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     }
