@@ -104,7 +104,7 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
           debug(`Message received`);
           const {state} = await riApiClient.getBlobMetadata({id: blobId});
           const aborted = state === RECORD_IMPORT_STATE.ABORTED;
-          const {status, metadata} = await handleMessage(message, correlationId, aborted);
+          const {status} = await handleMessage(message, correlationId, aborted);
           debug(`Queuing result: ${JSON.stringify(status)}`);
           if (status === RECORD_IMPORT_STATE.ERROR) {
             await channel.nack(message);
