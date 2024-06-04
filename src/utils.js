@@ -22,7 +22,7 @@ export function recordDataBuilder(result) {
 }
 
 export function parseBlobInfo(data) {
-  const {id, correlationId, profile, state, processingInfo} = data;
+  const {id, correlationId, profile, state, processingInfo = {}} = data;
   const {numberOfRecords = 0, failedRecords = [], importResults = []} = processingInfo;
   const created = importResults.filter(result => result.status === 'CREATED').length;
   const updated = importResults.filter(result => result.status === 'UPDATED').length;

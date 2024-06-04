@@ -20,6 +20,7 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
     debug('Amqp connected!');
 
     const {correlationId, queueItemState} = await getAndSetCorrelationId(blobId, noopProcessing);
+    debug(`Got bulk state ${queueItemState}`);
 
     try {
       if (queueItemState === 'PROCESSED') {
@@ -62,15 +63,19 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
 
       // if 0 queued items => processed
       const {messageCount} = await channel.assertQueue(blobId, {durable: true});
+      debug(`${messageCount} messages in queue ${blobId}`);
       if (messageCount === 0) {
         return {correlationId: 'noop', queueItemState: 'PROCESSED'};
       }
 
       const {correlationId, profile} = await riApiClient.getBlobMetadata({id});
+      debug(`got blob data ${id}`);
+
       // Add pCatalogerIn based on blobs profile
       const pCatalogerIn = profileToCataloger[profile] || 'LOAD_IMP';
 
-      if (correlationId !== '') {
+      if (correlationId && correlationId !== '') {
+        debug(`bulk correlation id: ${correlationId}`);
         return melindaApiClient.getBulkState(correlationId);
       }
 
@@ -108,7 +113,6 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
           }
 
           if (saveImportLogsToBlob) {
-            await riApiClient.setRecordQueued({id: blobId, ...metadata});
             await channel.ack(message);
             return consume(blobId, correlationId);
           }
