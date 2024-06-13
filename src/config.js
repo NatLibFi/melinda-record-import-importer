@@ -10,6 +10,7 @@ export const importOfflinePeriod = readEnvironmentVariable('IMPORT_OFFLINE_PERIO
 
 export const logLevel = readEnvironmentVariable('LOG_LEVEL', {defaultValue: 'info'});
 
+export const sendAsUpdate = readEnvironmentVariable('SEND_AS_UPDATE', {defaultValue: false, format: parseBoolean});
 export const noopProcessing = readEnvironmentVariable('NOOP_PROCESSING', {defaultValue: false, format: parseBoolean});
 export const noopMelindaImport = readEnvironmentVariable('NOOP_MELINDA_IMPORT', {defaultValue: false, format: parseBoolean});
 export const uniqueMelindaImport = readEnvironmentVariable('UNIQUE_MELINDA_IMPORT', {defaultValue: true, format: parseBoolean});

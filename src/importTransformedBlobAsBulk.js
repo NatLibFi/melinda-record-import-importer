@@ -8,7 +8,7 @@ import {promisify} from 'util';
 export default function (riApiClient, melindaApiClient, amqplib, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importTransformedBlobAsBulk');
   const setTimeoutPromise = promisify(setTimeout);
-  const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport, saveImportLogsToBlob} = config;
+  const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport, saveImportLogsToBlob, sendAsUpdate} = config;
   return {startHandling};
 
   async function startHandling(blobId) {
@@ -68,11 +68,11 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
         return {correlationId: 'noop', queueItemState: 'PROCESSED'};
       }
 
-      const {correlationId, profile} = await riApiClient.getBlobMetadata({id});
+      const {correlationId, profile, cataloger = ''} = await riApiClient.getBlobMetadata({id});
       debug(`got blob data ${id}`);
 
       // Add pCatalogerIn based on blobs profile
-      const pCatalogerIn = profileToCataloger[profile] || 'LOAD_IMP';
+      const pCatalogerIn = cataloger === '' ? profileToCataloger[profile] || 'LOAD_IMP' : cataloger;
 
       if (correlationId && correlationId !== '') {
         debug(`bulk correlation id: ${correlationId}`);
@@ -82,7 +82,11 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
       debug('Creating new bulk item to Melinda rest api');
       debug(`Options: unique: ${uniqueMelindaImport}, noop: ${noopMelindaImport}, cataloger: ${pCatalogerIn}`);
       // Create bulk to melinda rest api
-      const bulkConf = {
+      const bulkConf = sendAsUpdate ? {
+        pOldNew: 'OLD',
+        pActiveLibrary: 'FIN01',
+        pCatalogerIn
+      } : {
         unique: uniqueMelindaImport ? '1' : '0',
         noop: noopMelindaImport ? '1' : '0',
         merge: mergeMelindaImport ? '1' : '0',

@@ -70,6 +70,25 @@
       "response": "08",
       "url": "/blobs/000",
       "status": 204
+    },
+    {
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 200,
+      "requestHeaders": {
+        "user-agent": [
+          "test"
+        ],
+        "content-type": [
+          "application/json"
+        ],
+        "authorization": [
+          "123456789SecretTestToken!"
+        ],
+        "accept": [
+          "html"
+        ]
+      }
     }
   ]
 }
