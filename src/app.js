@@ -5,7 +5,7 @@ import {handleBulkResult} from './handleBulkResult';
 import createDebugLogger from 'debug';
 import prettyPrint from 'pretty-print-ms';
 import {parseBlobInfo} from './utils';
-import {createWebhookOperator} from '@natlibfi/melinda-backend-commons';
+import {createWebhookOperator, sendMail} from '@natlibfi/melinda-backend-commons';
 
 
 export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
@@ -41,6 +41,13 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       }
 
       const blobInfo = await riApiClient.getBlobMetadata({id});
+      const {smtpConfig = false, messageOptions} = config;
+      if (blobInfo.notificationEmail !== '' && smtpConfig) {
+        messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line
+        messageOptions.context = {recordInfo: blobInfo?.processingInfo?.importResults};
+        sendMail({messageOptions, smtpConfig});
+      }
+
       const parsedBlobInfo = parseBlobInfo(blobInfo);
       webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
 

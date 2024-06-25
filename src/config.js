@@ -18,6 +18,12 @@ export const mergeMelindaImport = readEnvironmentVariable('MERGE_MELINDA_IMPORT'
 export const importAsBulk = readEnvironmentVariable('IMPORT_AS_BULK', {defaultValue: true, format: parseBoolean});
 export const saveImportLogsToBlob = readEnvironmentVariable('SAVE_IMPORT_LOGS_TO_BLOB', {defaultValue: false, format: parseBoolean});
 
+export const messageOptions = {
+  from: readEnvironmentVariable('MESSAGE_FROM', {defaultValue: false}),
+  subject: readEnvironmentVariable('MESSAGE_SUBJECT', {defaultValue: false}),
+  templateName: readEnvironmentVariable('MESSAGE_TEMPLATE_NAME', {defaultValue: false})
+};
+export const smtpConfig = readEnvironmentVariable('SMTP_CONFIG', {defaultValue: false, format: JSON.parse});
 
 export const recordImportApiOptions = {
   recordImportApiUrl: readEnvironmentVariable('RECORD_IMPORT_API_URL', {defaultValue: 'RECORD_IMPORT_API_URL env is not set!'}),

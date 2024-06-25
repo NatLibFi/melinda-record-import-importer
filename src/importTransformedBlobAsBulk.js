@@ -83,6 +83,7 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
       debug(`Options: unique: ${uniqueMelindaImport}, noop: ${noopMelindaImport}, cataloger: ${pCatalogerIn}`);
       // Create bulk to melinda rest api
       const bulkConf = sendAsUpdate ? {
+        noop: noopMelindaImport ? '1' : '0',
         pOldNew: 'OLD',
         pActiveLibrary: 'FIN01',
         pCatalogerIn
