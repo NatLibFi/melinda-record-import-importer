@@ -26,13 +26,14 @@ jobs:
       env:
         NPM_CONFIG_IGNORE_SCRIPTS: true
     - run: npm audit --package-lock-only --production --audit-level=high
-    - run: npm ci
+    - run: npm i
     - run: npm test
     - run: npm run build --if-present
 
   njsscan:
     name: Njsscan check
     runs-on: ubuntu-latest
+    container: docker://node:20
 
     steps:
     - name: Checkout the code
@@ -46,10 +47,11 @@ jobs:
   license-scan:
     name: License compliance check
     runs-on: ubuntu-latest
+    container: docker://node:20
 
     steps:
       - uses: actions/checkout@v4
-      - uses: mikaelvesavuori/license-compliance-action@v1.0.2
+      - uses: mikaelvesavuori/license-compliance-action@v1
         with:
           exclude_pattern: /^@natlibfi/
 
@@ -57,6 +59,7 @@ jobs:
     name: OpenShift webhook for image builder
     needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
+    container: docker://node:20
 
     steps:
       - name: Test webhook - test branch

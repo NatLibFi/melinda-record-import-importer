@@ -1,7 +1,7 @@
 import {handleInterrupt, createLogger} from '@natlibfi/melinda-backend-commons';
 import * as config from './config';
 import {startApp} from './app';
-import {createApiClient as createRecordImportApiClient} from '@natlibfi/melinda-record-import-commons';
+import {createApiClient as createRecordImportApiClient, createMongoOperator} from '@natlibfi/melinda-record-import-commons';
 import {createMelindaApiRecordClient} from '@natlibfi/melinda-rest-api-client';
 import bulkImportBlobHandlerFactory from './importTransformedBlobAsBulk';
 import prioImportBlobHandlerFactory from './importTransformedBlobAsPrio';
@@ -13,7 +13,8 @@ run();
 async function run() {
   registerInterruptionHandlers();
 
-  const riApiClient = createRecordImportApiClient(config.recordImportApiOptions);
+  const mongoOperator = config.mongoUrl ? await createMongoOperator(config.mongoUrl) : false;
+  const riApiClient = await createRecordImportApiClient(config.recordImportApiOptions, config.keycloakOptions, mongoOperator);
   const melindaRestApiClient = createMelindaApiRecordClient(config.melindaRestApiOptions);
   const blobImportHandler = config.importAsBulk ? bulkImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config) : prioImportBlobHandlerFactory(riApiClient, melindaRestApiClient, amqplib, config);
 

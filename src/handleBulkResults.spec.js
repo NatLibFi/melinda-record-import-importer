@@ -2,15 +2,16 @@ import {expect} from 'chai';
 import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen-http-client';
 import {handleBulkResult} from './handleBulkResult';
-import createDebugLogger from 'debug';
 import {createApiClient} from '@natlibfi/melinda-record-import-commons';
 
-const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults:test');
-const client = createApiClient({
+// import createDebugLogger from 'debug';
+// const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults:test');
+const keycloakOptions = {test: true};
+const recordImportApiOptions = {
   recordImportApiUrl: 'http://foo.bar',
-  recordImportApiUsername: 'foo',
-  recordImportApiPassword: 'bar'
-});
+  userAgent: 'test',
+  allowSelfSignedApiCert: true
+};
 
 generateTests({
   callback,
@@ -22,18 +23,14 @@ generateTests({
   }
 });
 
-async function callback({getFixture, enabled = true}) {
-  if (enabled === false) {
-    debug('TEST SKIPPED!');
-    return;
-  }
-
+async function callback({getFixture}) {
+  const riApiClient = await createApiClient(recordImportApiOptions, keycloakOptions);
   const importResults = getFixture('input.json');
   const expectedResults = getFixture('output.json');
   // debug(importResults);
   // debug(expectedResults);
 
-  const handledRecords = await handleBulkResult(client, '000', importResults);
+  const handledRecords = await handleBulkResult(riApiClient, '000', importResults);
   // debug(handledRecords);
   expect(handledRecords).to.deep.equal(expectedResults);
 }

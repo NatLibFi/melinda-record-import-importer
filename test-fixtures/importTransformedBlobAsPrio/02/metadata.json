@@ -1,5 +1,7 @@
 {
   "description": "Handle transformed blob - Importing, 2 CREATE messages",
+  "only": false,
+  "skip": false,
   "configs": {
     "blobId": "000",
     "profileId": "foobar",
@@ -18,7 +20,7 @@
       "method": "post",
       "url": "/auth",
       "status": 204,
-      "responseHeaders":{
+      "responseHeaders": {
         "Token": "0-0-0"
       }
     },
@@ -37,9 +39,9 @@
       "status": 201
     },
     {
-      "step": "post record blob",
+      "step": "put record blob",
       "response": "04",
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     },
@@ -58,16 +60,16 @@
       "status": 201
     },
     {
-      "step": "post record blob",
+      "step": "put record blob",
       "response": "07",
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     },
     {
-      "step": "post blob state update PROCESSED",
+      "step": "put blob state update PROCESSED",
       "response": "08",
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     }

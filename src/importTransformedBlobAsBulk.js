@@ -8,7 +8,7 @@ import {promisify} from 'util';
 export default function (riApiClient, melindaApiClient, amqplib, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importTransformedBlobAsBulk');
   const setTimeoutPromise = promisify(setTimeout);
-  const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport, saveImportLogsToBlob} = config;
+  const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport, saveImportLogsToBlob, sendAsUpdate} = config;
   return {startHandling};
 
   async function startHandling(blobId) {
@@ -20,6 +20,7 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
     debug('Amqp connected!');
 
     const {correlationId, queueItemState} = await getAndSetCorrelationId(blobId, noopProcessing);
+    debug(`Got bulk state ${queueItemState}`);
 
     try {
       if (queueItemState === 'PROCESSED') {
@@ -62,22 +63,31 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
 
       // if 0 queued items => processed
       const {messageCount} = await channel.assertQueue(blobId, {durable: true});
+      debug(`${messageCount} messages in queue ${blobId}`);
       if (messageCount === 0) {
         return {correlationId: 'noop', queueItemState: 'PROCESSED'};
       }
 
-      const {correlationId, profile} = await riApiClient.getBlobMetadata({id});
-      // Add pCatalogerIn based on blobs profile
-      const pCatalogerIn = profileToCataloger[profile] || 'LOAD_IMP';
+      const {correlationId, profile, cataloger = ''} = await riApiClient.getBlobMetadata({id});
+      debug(`got blob data ${id}`);
 
-      if (correlationId !== '') {
+      // Add pCatalogerIn based on blobs profile
+      const pCatalogerIn = cataloger === '' ? profileToCataloger[profile] || 'LOAD_IMP' : cataloger;
+
+      if (correlationId && correlationId !== '') {
+        debug(`bulk correlation id: ${correlationId}`);
         return melindaApiClient.getBulkState(correlationId);
       }
 
       debug('Creating new bulk item to Melinda rest api');
       debug(`Options: unique: ${uniqueMelindaImport}, noop: ${noopMelindaImport}, cataloger: ${pCatalogerIn}`);
       // Create bulk to melinda rest api
-      const bulkConf = {
+      const bulkConf = sendAsUpdate ? {
+        noop: noopMelindaImport ? '1' : '0',
+        pOldNew: 'OLD',
+        pActiveLibrary: 'FIN01',
+        pCatalogerIn
+      } : {
         unique: uniqueMelindaImport ? '1' : '0',
         noop: noopMelindaImport ? '1' : '0',
         merge: mergeMelindaImport ? '1' : '0',
@@ -99,7 +109,7 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
           debug(`Message received`);
           const {state} = await riApiClient.getBlobMetadata({id: blobId});
           const aborted = state === RECORD_IMPORT_STATE.ABORTED;
-          const {status, metadata} = await handleMessage(message, correlationId, aborted);
+          const {status} = await handleMessage(message, correlationId, aborted);
           debug(`Queuing result: ${JSON.stringify(status)}`);
           if (status === RECORD_IMPORT_STATE.ERROR) {
             await channel.nack(message);
@@ -108,7 +118,6 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
           }
 
           if (saveImportLogsToBlob) {
-            await riApiClient.setRecordQueued({id: blobId, ...metadata});
             await channel.ack(message);
             return consume(blobId, correlationId);
           }

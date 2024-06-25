@@ -4,11 +4,15 @@ import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 import {handleBulkResult} from './handleBulkResult';
 import createDebugLogger from 'debug';
 import prettyPrint from 'pretty-print-ms';
+import {parseBlobInfo} from './utils';
+import {createWebhookOperator, sendMail} from '@natlibfi/melinda-backend-commons';
 
-const setTimeoutPromise = promisify(setTimeout);
-const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
 
 export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
+  const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
+  const setTimeoutPromise = promisify(setTimeout);
+  const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
+  const webhookAlertOperator = createWebhookOperator(config.notifications.alertUrl);
   await logic();
 
   async function logic(wait = false, waitSinceLastOp = 0) {
@@ -29,7 +33,29 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       const {correlationId, id} = processingInfo;
       debug(`Handling ${BLOB_STATE.PROCESSING_BULK} blob ${id}, correlationId: ${correlationId}`);
       const importResults = await pollResultHandling(melindaRestApiClient, id, correlationId);
-      await handleBulkResult(riApiClient, id, importResults);
+      const recordsSet = await handleBulkResult(riApiClient, id, importResults);
+
+      if (!recordsSet) {
+        webhookAlertOperator.sendNotification({text: `Rest-api queue item state: ${importResults.queueItemState}, id: ${id}, correlationId: ${correlationId}`});
+        return logic();
+      }
+
+      const blobInfo = await riApiClient.getBlobMetadata({id});
+      const {smtpConfig = false, messageOptions} = config;
+      if (blobInfo.notificationEmail !== '' && smtpConfig) {
+        messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
+        messageOptions.context = {recordInfo: blobInfo?.processingInfo?.importResults}; // eslint-disable-line functional/immutable-data
+        sendMail({messageOptions, smtpConfig});
+
+        const parsedBlobInfo = parseBlobInfo(blobInfo);
+        webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
+
+        return logic();
+      }
+
+      const parsedBlobInfo = parseBlobInfo(blobInfo);
+      webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
+
       return logic();
     }
 
@@ -77,6 +103,8 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
 
     if (metadata.state === BLOB_STATE.ABORTED) {
       debug('Blob state is set to ABORTED. Stopping rest api');
+      webhookAlertOperator.sendNotification({text: `Record-Import ABORTED id: ${recordImportBlobId}, correlationId: ${melindaRestApiCorrelationId}`});
+
       await melindaRestApiClient.setBulkStatus(melindaRestApiCorrelationId, 'ABORT');
 
       return logic();

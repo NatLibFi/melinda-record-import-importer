@@ -1,5 +1,7 @@
 {
   "description": "Handle transformed blob - Importing, 2 UPDATE messages",
+  "only": false,
+  "skip": false,
   "configs": {
     "blobId": "000",
     "profileId": "foobar",
@@ -17,7 +19,7 @@
       "response": "01",
       "url": "/auth",
       "status": 204,
-      "responseHeaders":{
+      "responseHeaders": {
         "Token": "0-0-0"
       }
     },
@@ -32,10 +34,12 @@
       "response": "03",
       "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
       "status": 200,
-      "responseHeaders": {"Record-ID": "000000001"}
+      "responseHeaders": {
+        "Record-ID": "000000001"
+      }
     },
     {
-      "method": "post",
+      "method": "put",
       "response": "04",
       "url": "/blobs/000",
       "status": 204
@@ -51,19 +55,40 @@
       "response": "06",
       "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
       "status": 200,
-      "responseHeaders": {"Record-ID": "000000002"}
+      "responseHeaders": {
+        "Record-ID": "000000002"
+      }
     },
     {
-      "method": "post",
+      "method": "put",
       "response": "07",
       "url": "/blobs/000",
       "status": 204
     },
     {
-      "method": "post",
+      "method": "put",
       "response": "08",
       "url": "/blobs/000",
       "status": 204
+    },
+    {
+      "method": "post",
+      "url": "/blobs/000",
+      "status": 200,
+      "requestHeaders": {
+        "user-agent": [
+          "test"
+        ],
+        "content-type": [
+          "application/json"
+        ],
+        "authorization": [
+          "123456789SecretTestToken!"
+        ],
+        "accept": [
+          "html"
+        ]
+      }
     }
   ]
 }

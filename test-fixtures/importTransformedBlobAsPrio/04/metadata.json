@@ -16,7 +16,7 @@
       "method": "post",
       "url": "/auth",
       "status": 204,
-      "responseHeaders":{
+      "responseHeaders": {
         "Token": "0-0-0"
       }
     },
@@ -26,7 +26,7 @@
       "status": 200
     },
     {
-      "method": "post",
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     },
@@ -36,14 +36,19 @@
       "status": 200
     },
     {
-      "method": "post",
+      "method": "put",
+      "url": "/blobs/000",
+      "status": 204
+    },
+    {
+      "method": "put",
       "url": "/blobs/000",
       "status": 204
     },
     {
       "method": "post",
       "url": "/blobs/000",
-      "status": 204
+      "status": 200
     }
   ]
 }
