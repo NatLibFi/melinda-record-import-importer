@@ -43,9 +43,14 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       const blobInfo = await riApiClient.getBlobMetadata({id});
       const {smtpConfig = false, messageOptions} = config;
       if (blobInfo.notificationEmail !== '' && smtpConfig) {
-        messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line
-        messageOptions.context = {recordInfo: blobInfo?.processingInfo?.importResults};
+        messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
+        messageOptions.context = {recordInfo: blobInfo?.processingInfo?.importResults}; // eslint-disable-line functional/immutable-data
         sendMail({messageOptions, smtpConfig});
+
+        const parsedBlobInfo = parseBlobInfo(blobInfo);
+        webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
+
+        return logic();
       }
 
       const parsedBlobInfo = parseBlobInfo(blobInfo);
