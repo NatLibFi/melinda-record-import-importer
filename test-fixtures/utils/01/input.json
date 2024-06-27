@@ -1,0 +1,202 @@
+[
+  {
+    "record": {
+      "_validationOptions": {},
+      "leader": "00000nam a22000004i 4500",
+      "fields": [
+        {
+          "tag": "245",
+          "ind1": "0",
+          "ind2": "0",
+          "subfields": [
+            {
+              "code": "a",
+              "value": "Record 1 title ="
+            },
+            {
+              "code": "b",
+              "value": "Record 1 subtitle."
+            }
+          ]
+        }
+      ]
+    },
+    "failed": true,
+    "messages": [
+      {
+        "description": "Checks whether the configured fields are present in the record",
+        "state": "invalid",
+        "messages": [
+          "The following tag patterns are not present in the record tag field:  /^(020|022|024)$/u"
+        ]
+      },
+      {
+        "description": "Checks whether the configured fields are present in the record",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Checks that the record does not contain the configured fields",
+        "state": "fixed"
+      },
+      {
+        "description": "Fix various subfield internal values",
+        "state": "valid"
+      },
+      {
+        "description": "Validator for sanitizing vocabulary source codes in subfield $2 (MRA-532)",
+        "state": "valid"
+      },
+      {
+        "description": "Normalize \" ; \" separators as \" -- \"",
+        "state": "valid"
+      },
+      {
+        "description": "Validates 008 06",
+        "state": "valid"
+      },
+      {
+        "description": "Handles empty fields",
+        "state": "valid"
+      },
+      {
+        "description": "Validates ISBN and ISSN values",
+        "state": "valid"
+      },
+      {
+        "description": "Various fixes for field 521",
+        "state": "valid"
+      },
+      {
+        "description": "Checks that the record does not contain the configured subfields",
+        "state": "valid"
+      },
+      {
+        "description": "Check whether the configured fields have valid structure",
+        "state": "valid"
+      },
+      {
+        "description": "Handles subfields that contains non-breaking space character",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Handles subfields that ends with whitespace character",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Handles subfields that contains non-breaking space character",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Handles invalid ending punctuation",
+        "state": "fixed"
+      }
+    ],
+    "timestamp": "2024-06-27T03:00:08+03:00"
+  },
+  {
+    "record": {
+      "_validationOptions": {},
+      "leader": "00000nam a22000004i 4500",
+      "fields": [
+        {
+          "tag": "001",
+          "value": "001234567"
+        },
+        {
+          "tag": "245",
+          "ind1": "1",
+          "ind2": "0",
+          "subfields": [
+            {
+              "code": "a",
+              "value": "Record 2 title /"
+            },
+            {
+              "code": "c",
+              "value": "Matti Mallikas."
+            }
+          ]
+        }
+      ]
+    },
+    "failed": true,
+    "messages": [
+      {
+        "description": "Checks whether the configured fields are present in the record",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Checks whether the configured fields are present in the record",
+        "state": "invalid",
+        "messages": [
+          "The following tag patterns are not present in the record tag field:  /^336$/u /^337$/u /^338$/u"
+        ]
+      },
+      {
+        "description": "Checks that the record does not contain the configured fields",
+        "state": "fixed"
+      },
+      {
+        "description": "Fix various subfield internal values",
+        "state": "valid"
+      },
+      {
+        "description": "Validator for sanitizing vocabulary source codes in subfield $2 (MRA-532)",
+        "state": "valid"
+      },
+      {
+        "description": "Normalize \" ; \" separators as \" -- \"",
+        "state": "valid"
+      },
+      {
+        "description": "Validates 008 06",
+        "state": "valid"
+      },
+      {
+        "description": "Handles empty fields",
+        "state": "valid"
+      },
+      {
+        "description": "Validates ISBN and ISSN values",
+        "state": "fixed"
+      },
+      {
+        "description": "Various fixes for field 521",
+        "state": "valid"
+      },
+      {
+        "description": "Checks that the record does not contain the configured subfields",
+        "state": "valid"
+      },
+      {
+        "description": "Check whether the configured fields have valid structure",
+        "state": "valid"
+      },
+      {
+        "description": "Handles subfields that contains non-breaking space character",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Handles subfields that ends with whitespace character",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Handles subfields that contains non-breaking space character",
+        "state": "valid",
+        "messages": []
+      },
+      {
+        "description": "Handles invalid ending punctuation",
+        "state": "fixed"
+      }
+    ],
+    "timestamp": "2024-06-27T03:00:08+03:00"
+  }
+]
