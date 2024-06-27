@@ -4,8 +4,8 @@ import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 import {handleBulkResult} from './handleBulkResult';
 import createDebugLogger from 'debug';
 import prettyPrint from 'pretty-print-ms';
-import {parseBlobInfo} from './utils';
-import {createWebhookOperator, sendMail} from '@natlibfi/melinda-backend-commons';
+import {parseBlobInfo, failedRecordsCollector} from './utils';
+import {createWebhookOperator, sendEmail} from '@natlibfi/melinda-backend-commons';
 
 
 export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
@@ -44,8 +44,11 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       const {smtpConfig = false, messageOptions} = config;
       if (blobInfo.notificationEmail !== '' && smtpConfig) {
         messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
-        messageOptions.context = {recordInfo: blobInfo?.processingInfo?.importResults}; // eslint-disable-line functional/immutable-data
-        sendMail({messageOptions, smtpConfig});
+        const importResults = blobInfo?.processingInfo?.importResults || [];
+        const parsedFailedRecords = failedRecordsCollector(blobInfo?.processingInfo?.failedRecords);
+        const recordInfo = [...importResults, ...parsedFailedRecords];
+        messageOptions.context = {recordInfo}; // eslint-disable-line functional/immutable-data
+        sendEmail({messageOptions, smtpConfig});
 
         const parsedBlobInfo = parseBlobInfo(blobInfo);
         webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
