@@ -3,7 +3,6 @@ import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen';
 import createDebugLogger from 'debug';
 import {failedRecordsCollector} from './utils';
-import {sendEmail} from '@natlibfi/melinda-backend-commons';
 
 // eslint-disable-next-line no-unused-vars
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:utils:test');
