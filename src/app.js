@@ -7,7 +7,6 @@ import prettyPrint from 'pretty-print-ms';
 import {parseBlobInfo, failedRecordsCollector} from './utils';
 import {createWebhookOperator, sendEmail} from '@natlibfi/melinda-backend-commons';
 
-
 export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
   const setTimeoutPromise = promisify(setTimeout);
