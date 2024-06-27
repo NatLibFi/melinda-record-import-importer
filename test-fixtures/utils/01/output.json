@@ -1,0 +1,16 @@
+[
+  {
+    "metadata": {
+      "id": "000000000",
+      "title": "Record 1 title = Record 1 subtitle."
+    },
+    "status": "ERROR - The following tag patterns are not present in the record tag field:  /^(020|022|024)$/u"
+  },
+  {
+    "metadata": {
+      "id": "001234567",
+      "title": "Record 2 title /"
+    },
+    "status": "ERROR - The following tag patterns are not present in the record tag field:  /^336$/u /^337$/u /^338$/u"
+  }
+]

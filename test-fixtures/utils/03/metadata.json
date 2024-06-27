@@ -1,0 +1,6 @@
+{
+  "description": "Parsing empty failedRecords to record info",
+  "only": false,
+  "skip": false,
+  "method": "failedRecordsCollector"
+}
