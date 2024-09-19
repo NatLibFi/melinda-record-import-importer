@@ -1,4 +1,4 @@
-import {getNextBlobId, BLOB_STATE} from '@natlibfi/melinda-record-import-commons';
+import {isOfflinePeriod, BLOB_STATE, createMongoBlobsOperator} from '@natlibfi/melinda-record-import-commons';
 import {promisify} from 'util';
 import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 import {handleBulkResult} from './handleBulkResult';
@@ -12,6 +12,7 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
   const setTimeoutPromise = promisify(setTimeout);
   const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
   const webhookAlertOperator = createWebhookOperator(config.notifications.alertUrl);
+  const mongoOperator = await createMongoBlobsOperator(config.mongoUrl);
   await logic();
 
   async function logic(wait = false, waitSinceLastOp = 0) {
@@ -39,7 +40,7 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
         return logic();
       }
 
-      const blobInfo = await riApiClient.getBlobMetadata({id});
+      const blobInfo = await mongoOperator.readBlob({id});
       const {smtpConfig = false, messageOptions} = config;
       if (blobInfo.notificationEmail !== '' && smtpConfig) {
         messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
@@ -82,12 +83,17 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
     return logic(true, waitSinceLastOp);
 
     async function processBlobState(profileIds, state, importOfflinePeriod) {
-      const blobInfo = await getNextBlobId(riApiClient, {profileIds, state, importOfflinePeriod});
-      if (blobInfo) {
-        return blobInfo;
+      if (!isOfflinePeriod(importOfflinePeriod)) {
+        const [blobInfo] = await mongoOperator.queryBlob({limit: 1, profile: profileIds.join(','), state});
+
+        if (blobInfo) {
+          // debug(`No blobs in ${state} found for ${profileIds}`);
+          return blobInfo;
+        }
+
+        return false;
       }
 
-      // debug(`No blobs in ${state} found for ${profileIds}`);
       return false;
     }
   }
@@ -95,7 +101,7 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
   async function pollResultHandling(melindaRestApiClient, recordImportBlobId, melindaRestApiCorrelationId) {
     const finalQueueItemStates = ['DONE', 'ERROR', 'ABORT'];
     debug('Getting blob metadata');
-    const metadata = await riApiClient.getBlobMetadata({id: recordImportBlobId});
+    const metadata = await mongoOperator.readBlob({id: recordImportBlobId});
     debug(`Got blob metadata from record import, state: ${metadata.state}`);
 
     if (melindaRestApiCorrelationId === 'noop') {
