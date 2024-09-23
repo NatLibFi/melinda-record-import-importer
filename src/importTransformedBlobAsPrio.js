@@ -1,13 +1,13 @@
 import httpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons/';
-import {closeAmqpResources, RECORD_IMPORT_STATE, BLOB_STATE} from '@natlibfi/melinda-record-import-commons';
+import {RECORD_IMPORT_STATE, BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import createDebugLogger from 'debug';
 import {recordDataBuilder} from './utils';
 import {promisify} from 'util';
 
 
-export default function (riApiClient, melindaApiClient, amqplib, config) {
+export default function (mongoOperator, melindaApiClient, amqplib, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importTransformedBlobAsPrio');
   const setTimeoutPromise = promisify(setTimeout);
   const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport} = config;
@@ -29,8 +29,13 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
 
       debug('All records imported');
 
-      await closeAmqpResources({connection, channel});
-      return riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSED});
+      return mongoOperator.updateBlob({
+        id: blobId,
+        payload: {
+          op: BLOB_UPDATE_OPERATIONS.updateState,
+          state: BLOB_STATE.PROCESSED
+        }
+      });
     } catch (error) {
       throw new Error(error);
     }
@@ -40,14 +45,23 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
       if (message) { // eslint-disable-line
         try {
           debug(`Message received`);
-          const {state, profile} = await riApiClient.getBlobMetadata({id: blobId});
+          const {state, profile} = await mongoOperator.readBlob({id: blobId});
           const aborted = state === RECORD_IMPORT_STATE.ABORTED;
           const {status, metadata} = await handleMessage(message, aborted, profile);
           debug(`Setting result in blob: ${JSON.stringify(status)}, ${JSON.stringify(metadata)}`);
-          await riApiClient.setRecordProcessed({id: blobId, metadata});
+          await mongoOperator.updateBlob({
+            id: blobId,
+            payload: {
+              op: BLOB_UPDATE_OPERATIONS.recordProcessed,
+              status, metadata
+            }
+          });
+          debug('blob updated');
           await channel.ack(message);
           return consume(blobId);
         } catch (err) {
+          debug(err);
+
           await setTimeoutPromise(10);
           await channel.nack(message);
           throw err;

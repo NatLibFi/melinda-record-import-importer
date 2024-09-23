@@ -1,0 +1,37 @@
+{
+  "blobmetadatas": [
+    {
+      "processingInfo": {
+        "numberOfRecords": 2,
+        "failedRecords": [],
+        "importResults": [
+          {
+            "metadata": {
+              "standardIdentifiers": [
+                "978-952-11-0000-0"
+              ],
+              "title": "Malli title"
+            },
+            "status": "SKIPPED"
+          },
+          {
+            "metadata": {
+              "standardIdentifiers": [
+                "978-952-11-0000-X"
+              ],
+              "title": "Malli title 2"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "id": "000",
+      "correlationId": "de9c748f-497d-4a60-a1da-6361aef55d69",
+      "profile": "profile",
+      "cataloger": "",
+      "notificationEmail": "",
+      "contentType": "application/json",
+      "state": "PROCESSED"
+    }
+  ]
+}

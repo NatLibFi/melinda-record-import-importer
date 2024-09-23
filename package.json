@@ -32,7 +32,7 @@
 		"build": "babel src --source-maps --copy-files --delete-dir-on-start --out-dir=dist",
 		"watch:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test nodemon",
 		"dev": "cross-env NODE_ENV=test nodemon",
-		"dev:debug": "cross-env NODE_ENV=test DEBUG=@natlibfi/* nodemon"
+		"dev:debug": "cross-env NODE_ENV=test nodemon"
 	},
 	"dependencies": {
 		"@babel/runtime": "^7.23.9",
@@ -43,6 +43,7 @@
 		"@natlibfi/melinda-rest-api-client": "^4.0.3",
 		"@natlibfi/melinda-rest-api-commons": "^4.1.3",
 		"amqplib": "^0.10.3",
+		"http-request-mock": "^2.0.1",
 		"http-status": "^1.7.3",
 		"pretty-print-ms": "^1.0.5"
 	},
@@ -56,6 +57,7 @@
 		"@natlibfi/fixugen": "^2.0.4",
 		"@natlibfi/fixugen-http-client": "^3.0.4",
 		"@natlibfi/fixura": "^3.0.4",
+		"@natlibfi/fixura-mongo": "^2.0.19-alpha.1",
 		"@onify/fake-amqplib": "^1.0.0",
 		"babel-plugin-istanbul": "^6.1.1",
 		"babel-plugin-rewire": "^1.2.0",
@@ -102,7 +104,7 @@
 		"exit": true
 	},
 	"nodemonConfig": {
-		"exec": "npm run _test:dev",
+		"exec": "DEBUG=@natlibfi/* npm run _test:dev",
 		"watch": [
 			"src/*",
 			"test-fixtures/*"

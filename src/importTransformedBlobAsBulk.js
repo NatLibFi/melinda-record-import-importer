@@ -1,11 +1,11 @@
 import httpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons/';
-import {closeAmqpResources, RECORD_IMPORT_STATE, BLOB_STATE} from '@natlibfi/melinda-record-import-commons';
+import {RECORD_IMPORT_STATE, BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import createDebugLogger from 'debug';
 import {promisify} from 'util';
 
-export default function (riApiClient, melindaApiClient, amqplib, config) {
+export default function (mongoOperator, melindaApiClient, amqplib, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importTransformedBlobAsBulk');
   const setTimeoutPromise = promisify(setTimeout);
   const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport, saveImportLogsToBlob, sendAsUpdate} = config;
@@ -24,8 +24,14 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
 
     try {
       if (queueItemState === 'PROCESSED') {
-        await closeAmqpResources({connection, channel});
-        return riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSED});
+        await mongoOperator.updateBlob({
+          id: blobId,
+          payload: {
+            op: BLOB_UPDATE_OPERATIONS.updateState,
+            state: BLOB_STATE.PROCESSED
+          }
+        });
+        return;
       }
 
       if (queueItemState === 'WAITING_FOR_RECORDS') {
@@ -36,18 +42,34 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
 
         debug('Queued all messages.');
 
-        await closeAmqpResources({connection, channel});
         if (correlationId === 'noop') {
-          return riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSING_BULK});
+          return mongoOperator.updateBlob({
+            id: blobId,
+            payload: {
+              op: BLOB_UPDATE_OPERATIONS.updateState,
+              state: BLOB_STATE.PROCESSING_BULK
+            }
+          });
         }
 
         await melindaApiClient.setBulkStatus(correlationId, 'PENDING_VALIDATION');
-        return riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSING_BULK});
+        return mongoOperator.updateBlob({
+          id: blobId,
+          payload: {
+            op: BLOB_UPDATE_OPERATIONS.updateState,
+            state: BLOB_STATE.PROCESSING_BULK
+          }
+        });
       }
 
       debug(`Bulk state: ${queueItemState}, moving to poll phase`);
-      await closeAmqpResources({connection, channel});
-      return riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSING_BULK});
+      return mongoOperator.updateBlob({
+        id: blobId,
+        payload: {
+          op: BLOB_UPDATE_OPERATIONS.updateState,
+          state: BLOB_STATE.PROCESSING_BULK
+        }
+      });
     } catch (error) {
       throw new Error(error);
     }
@@ -57,7 +79,13 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
         debug('Noop response for correlation id');
         const correlationId = 'noop';
         const queueItemState = 'WAITING_FOR_RECORDS';
-        await riApiClient.setCorrelationId({id, correlationId});
+        await mongoOperator.updateBlob({
+          id: blobId,
+          payload: {
+            op: BLOB_UPDATE_OPERATIONS.addCorrelationId,
+            correlationId
+          }
+        });
         return {correlationId, queueItemState};
       }
 
@@ -68,7 +96,7 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
         return {correlationId: 'noop', queueItemState: 'PROCESSED'};
       }
 
-      const {correlationId, profile, cataloger = ''} = await riApiClient.getBlobMetadata({id});
+      const {correlationId, profile, cataloger = ''} = await mongoOperator.readBlob({id});
       debug(`got blob data ${id}`);
 
       // Add pCatalogerIn based on blobs profile
@@ -98,7 +126,13 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
       const response = await melindaApiClient.creteBulkNoStream('application/json', bulkConf);
       debug(`Bulk response: ${JSON.stringify(response)}`);
       // setCorrelationId to blob in record import rest api
-      await riApiClient.setCorrelationId({id, correlationId: response.correlationId});
+      await mongoOperator.updateBlob({
+        id,
+        payload: {
+          op: BLOB_UPDATE_OPERATIONS.addCorrelationId,
+          correlationId: response.correlationId
+        }
+      });
       return response;
     }
 
@@ -107,7 +141,7 @@ export default function (riApiClient, melindaApiClient, amqplib, config) {
       if (message) { // eslint-disable-line
         try {
           debug(`Message received`);
-          const {state} = await riApiClient.getBlobMetadata({id: blobId});
+          const {state} = await mongoOperator.readBlob({id: blobId});
           const aborted = state === RECORD_IMPORT_STATE.ABORTED;
           const {status} = await handleMessage(message, correlationId, aborted);
           debug(`Queuing result: ${JSON.stringify(status)}`);

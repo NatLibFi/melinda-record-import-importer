@@ -1,0 +1,33 @@
+{
+  "blobmetadatas": [
+    {
+      "processingInfo": {
+        "numberOfRecords": 1,
+        "failedRecords": [],
+        "importResults": [
+          {
+            "metadata": {
+              "id": "001234567",
+              "message": "",
+              "sourceIds": [
+                "(MALLI)0239734"
+              ],
+              "standardIdentifiers": [
+                "978-952-373-345-9"
+              ],
+              "title": "example"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "id": "000",
+      "correlationId": "de9c748f-497d-4a60-a1da-6361aef55d69",
+      "profile": "profile",
+      "cataloger": "",
+      "notificationEmail": "",
+      "contentType": "application/json",
+      "state": "PROCESSED"
+    }
+  ]
+}

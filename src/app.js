@@ -1,4 +1,4 @@
-import {isOfflinePeriod, BLOB_STATE, createMongoBlobsOperator} from '@natlibfi/melinda-record-import-commons';
+import {isOfflinePeriod, BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import {promisify} from 'util';
 import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 import {handleBulkResult} from './handleBulkResult';
@@ -7,12 +7,11 @@ import prettyPrint from 'pretty-print-ms';
 import {parseBlobInfo, failedRecordsCollector} from './utils';
 import {createWebhookOperator, sendEmail} from '@natlibfi/melinda-backend-commons';
 
-export async function startApp(config, riApiClient, melindaRestApiClient, blobImportHandler) {
+export async function startApp(config, mongoOperator, melindaRestApiClient, blobImportHandler) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
   const setTimeoutPromise = promisify(setTimeout);
   const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
   const webhookAlertOperator = createWebhookOperator(config.notifications.alertUrl);
-  const mongoOperator = await createMongoBlobsOperator(config.mongoUrl);
   await logic();
 
   async function logic(wait = false, waitSinceLastOp = 0) {
@@ -33,7 +32,7 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       const {correlationId, id} = processingInfo;
       debug(`Handling ${BLOB_STATE.PROCESSING_BULK} blob ${id}, correlationId: ${correlationId}`);
       const importResults = await pollResultHandling(melindaRestApiClient, id, correlationId);
-      const recordsSet = await handleBulkResult(riApiClient, id, importResults);
+      const recordsSet = await handleBulkResult(mongoOperator, id, importResults);
 
       if (!recordsSet) {
         webhookAlertOperator.sendNotification({text: `Rest-api queue item state: ${importResults.queueItemState}, id: ${id}, correlationId: ${correlationId}`});
@@ -76,7 +75,13 @@ export async function startApp(config, riApiClient, melindaRestApiClient, blobIm
       debug(`Found blob in state TRANSFORMED: ${JSON.stringify(transformedBlobInfo)}`);
       const {id} = transformedBlobInfo;
       debug(`Start handling blob ${id}`);
-      await riApiClient.updateState({id, state: BLOB_STATE.PROCESSING});
+      await mongoOperator.updateBlob({
+        id,
+        payload: {
+          op: BLOB_UPDATE_OPERATIONS.updateState,
+          state: BLOB_STATE.PROCESSING
+        }
+      });
       return logic();
     }
 
