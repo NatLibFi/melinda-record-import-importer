@@ -96,7 +96,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
             profile: profileIds.join(','),
             state
           });
-          emitter.on('blobs', blobs => blobs.forEach(blob => results.push(blob))) // eslint-disable-line functional/immutable-data
+          emitter.on('blobs', blobs => blobs.forEach(blob => queryResult.push(blob))) // eslint-disable-line functional/immutable-data
             .on('error', error => reject(error))
             .on('end', () => resolve());
         });
