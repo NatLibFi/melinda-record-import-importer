@@ -89,10 +89,21 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
     async function processBlobState(profileIds, state, importOfflinePeriod) {
       if (!isOfflinePeriod(importOfflinePeriod)) {
-        const queryResult = await mongoOperator.queryBlob({limit: 1, profile: profileIds.join(','), state});
-        if (queryResult) {
-          const [blobInfo] = queryResult;
-          // debug(`No blobs in ${state} found for ${profileIds}`);
+        const queryResult = [];
+        await new Promise((resolve, reject) => {
+          const emitter = mongoOperator.queryBlob({
+            limit: 1,
+            profile: profileIds.join(','),
+            state
+          });
+          emitter.on('blobs', blobs => blobs.forEach(blob => results.push(blob))) // eslint-disable-line functional/immutable-data
+            .on('error', error => reject(error))
+            .on('end', () => resolve());
+        });
+
+        const [blobInfo] = queryResult;
+        // debug(`No blobs in ${state} found for ${profileIds}`);
+        if (blobInfo) {
           return blobInfo;
         }
 
