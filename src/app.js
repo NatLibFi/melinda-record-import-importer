@@ -26,10 +26,19 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
     // Check if blobs
     // debug(`Trying to find blobs for ${profileIds}`); // eslint-disable-line
-    const processingInfo = importAsBulk ? await processBlobState(profileIds, BLOB_STATE.PROCESSING_BULK, importOfflinePeriod) : false;
-    if (processingInfo) {
-      debug(`Found blob in state PROCESSING_BULK: ${JSON.stringify(processingInfo)}`);
-      const {correlationId, id} = processingInfo;
+    const blobInfo = importAsBulk ? await processBlobState(profileIds, BLOB_STATE.PROCESSING_BULK, importOfflinePeriod) : false;
+    if (blobInfo) {
+      debug(`Found blob in state PROCESSING_BULK: ${JSON.stringify(blobInfo)}`);
+      const {correlationId, id} = blobInfo;
+      if (blobInfo.processingInfo?.importResults?.length > 0) {
+        await mongoOperator.updateBlob({
+          id,
+          payload: {
+            op: BLOB_UPDATE_OPERATIONS.resetImportResults
+          }
+        });
+        return logic();
+      }
       debug(`Handling ${BLOB_STATE.PROCESSING_BULK} blob ${id}, correlationId: ${correlationId}`);
       const importResults = await pollResultHandling(melindaRestApiClient, id, correlationId);
       const recordsSet = await handleBulkResult(mongoOperator, id, importResults);
@@ -39,24 +48,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
         return logic();
       }
 
-      const blobInfo = await mongoOperator.readBlob({id});
-      const {smtpConfig = false, messageOptions} = config;
-      if (blobInfo.notificationEmail !== '' && smtpConfig) {
-        messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
-        const importResults = blobInfo?.processingInfo?.importResults || [];
-        const parsedFailedRecords = failedRecordsCollector(blobInfo?.processingInfo?.failedRecords);
-        const recordInfo = [...importResults, ...parsedFailedRecords];
-        messageOptions.context = {recordInfo}; // eslint-disable-line functional/immutable-data
-        sendEmail({messageOptions, smtpConfig});
-
-        const parsedBlobInfo = parseBlobInfo(blobInfo);
-        webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
-
-        return logic();
-      }
-
-      const parsedBlobInfo = parseBlobInfo(blobInfo);
-      webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
+      await handleNoticfications(id);
 
       return logic();
     }
@@ -86,6 +78,28 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
     }
 
     return logic(true, waitSinceLastOp);
+
+    async function handleNoticfications(id) {
+      const blobInfo = await mongoOperator.readBlob({id});
+      const {smtpConfig = false, messageOptions} = config;
+      if (blobInfo.notificationEmail !== '' && smtpConfig) {
+        messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
+        const importResults = blobInfo?.processingInfo?.importResults || [];
+        const parsedFailedRecords = failedRecordsCollector(blobInfo?.processingInfo?.failedRecords);
+        const recordInfo = [...importResults, ...parsedFailedRecords];
+        messageOptions.context = {recordInfo}; // eslint-disable-line functional/immutable-data
+        sendEmail({messageOptions, smtpConfig});
+
+        const parsedBlobInfo = parseBlobInfo(blobInfo);
+        webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
+        return;
+      }
+
+
+      const parsedBlobInfo = parseBlobInfo(blobInfo);
+      webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
+      return;
+    }
 
     async function processBlobState(profileIds, state, importOfflinePeriod) {
       if (!isOfflinePeriod(importOfflinePeriod)) {
