@@ -107,6 +107,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
         await new Promise((resolve, reject) => {
           const emitter = mongoOperator.queryBlob({
             limit: 1,
+            getAll: false,
             profile: profileIds.join(','),
             state
           });
