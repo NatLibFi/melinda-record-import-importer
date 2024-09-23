@@ -89,9 +89,9 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
     async function processBlobState(profileIds, state, importOfflinePeriod) {
       if (!isOfflinePeriod(importOfflinePeriod)) {
-        const [blobInfo] = await mongoOperator.queryBlob({limit: 1, profile: profileIds.join(','), state});
-
-        if (blobInfo) {
+        const queryResult = await mongoOperator.queryBlob({limit: 1, profile: profileIds.join(','), state});
+        if (queryResult) {
+          const [blobInfo] = queryResult;
           // debug(`No blobs in ${state} found for ${profileIds}`);
           return blobInfo;
         }
