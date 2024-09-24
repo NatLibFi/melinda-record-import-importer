@@ -31,14 +31,17 @@ import {BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-impor
 import {recordDataBuilder} from './utils';
 import createDebugLogger from 'debug';
 import {promisify} from 'util';
+import {createLogger} from '@natlibfi/melinda-backend-commons';
 
 const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults');
+const logger = createLogger();
 
 export async function handleBulkResult(mongoOperator, blobId, bulkImportResults) {
   debug('handleBulkresult Begun');
 
   if (bulkImportResults.records === undefined) {
+    logger.info('All records imported');
     await mongoOperator.updateBlob({
       id: blobId,
       payload: {
@@ -51,6 +54,7 @@ export async function handleBulkResult(mongoOperator, blobId, bulkImportResults)
   }
 
   if (bulkImportResults.queueItemState === 'ERROR' || bulkImportResults.queueItemState === 'ABORT') {
+    logger.info('Blob aborted');
     await mongoOperator.updateBlob({
       id: blobId,
       payload: {
@@ -64,6 +68,7 @@ export async function handleBulkResult(mongoOperator, blobId, bulkImportResults)
   debug('handleBulkresult Processing records');
   const records = await processRecordData(bulkImportResults.records);
 
+  logger.info('All records imported');
   await mongoOperator.updateBlob({
     id: blobId,
     payload: {

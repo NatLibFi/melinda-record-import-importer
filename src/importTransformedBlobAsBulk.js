@@ -1,12 +1,14 @@
 import httpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons/';
+import {createLogger} from '@natlibfi/melinda-backend-commons';
+import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons';
 import {RECORD_IMPORT_STATE, BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import createDebugLogger from 'debug';
 import {promisify} from 'util';
 
 export default function (mongoOperator, melindaApiClient, amqplib, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importTransformedBlobAsBulk');
+  const logger = createLogger();
   const setTimeoutPromise = promisify(setTimeout);
   const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport, saveImportLogsToBlob, sendAsUpdate} = config;
   return {startHandling};
@@ -24,6 +26,7 @@ export default function (mongoOperator, melindaApiClient, amqplib, config) {
 
     try {
       if (queueItemState === 'PROCESSED') {
+        logger.info('All records imported');
         await mongoOperator.updateBlob({
           id: blobId,
           payload: {

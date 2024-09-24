@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons/';
+import {createLogger} from '@natlibfi/melinda-backend-commons';
+import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons';
 import {RECORD_IMPORT_STATE, BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import createDebugLogger from 'debug';
 import {recordDataBuilder} from './utils';
@@ -9,6 +10,7 @@ import {promisify} from 'util';
 
 export default function (mongoOperator, melindaApiClient, amqplib, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importTransformedBlobAsPrio');
+  const logger = createLogger();
   const setTimeoutPromise = promisify(setTimeout);
   const {amqpUrl, noopProcessing, noopMelindaImport, profileToCataloger, uniqueMelindaImport, mergeMelindaImport} = config;
   return {startHandling};
@@ -23,11 +25,11 @@ export default function (mongoOperator, melindaApiClient, amqplib, config) {
 
     try {
       const {messageCount} = await channel.assertQueue(blobId, {durable: true});
-      debug(`Starting consuming records of blob ${blobId}, Sending ${messageCount} records to prio queue.`);
+      logger.info(`Starting consuming records of blob ${blobId}, Sending ${messageCount} records to prio queue.`);
 
       await consume(blobId);
 
-      debug('All records imported');
+      logger.info('All records imported');
 
       return mongoOperator.updateBlob({
         id: blobId,

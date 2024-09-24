@@ -1,14 +1,15 @@
-import {isOfflinePeriod, BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
+import {BLOB_STATE, BLOB_UPDATE_OPERATIONS, getNextBlob} from '@natlibfi/melinda-record-import-commons';
 import {promisify} from 'util';
 import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 import {handleBulkResult} from './handleBulkResult';
 import createDebugLogger from 'debug';
 import prettyPrint from 'pretty-print-ms';
 import {parseBlobInfo, failedRecordsCollector} from './utils';
-import {createWebhookOperator, sendEmail} from '@natlibfi/melinda-backend-commons';
+import {createWebhookOperator, sendEmail, createLogger} from '@natlibfi/melinda-backend-commons';
 
 export async function startApp(config, mongoOperator, melindaRestApiClient, blobImportHandler) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
+  const logger = createLogger();
   const setTimeoutPromise = promisify(setTimeout);
   const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
   const webhookAlertOperator = createWebhookOperator(config.notifications.alertUrl);
@@ -26,10 +27,11 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
     // Check if blobs
     // debug(`Trying to find blobs for ${profileIds}`); // eslint-disable-line
-    const blobInfo = importAsBulk ? await processBlobState(profileIds, BLOB_STATE.PROCESSING_BULK, importOfflinePeriod) : false;
+    const blobInfo = importAsBulk ? await getNextBlob(mongoOperator, {profileIds, state: BLOB_STATE.PROCESSING_BULK, importOfflinePeriod}) : false;
     if (blobInfo) {
       debug(`Found blob in state PROCESSING_BULK: ${JSON.stringify(blobInfo)}`);
       const {correlationId, id} = blobInfo;
+      logger.info(`Found blob in state PROCESSING_BULK ${id}`);
       if (blobInfo.processingInfo?.importResults?.length > 0) {
         await mongoOperator.updateBlob({
           id,
@@ -53,19 +55,21 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       return logic();
     }
 
-    const processingQueueBlobInfo = await processBlobState(profileIds, BLOB_STATE.PROCESSING, importOfflinePeriod);
+    const processingQueueBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: BLOB_STATE.PROCESSING, importOfflinePeriod});
     if (processingQueueBlobInfo) {
       debug(`Found blob in state PROCESSING: ${JSON.stringify(processingQueueBlobInfo)}`);
       const {id} = processingQueueBlobInfo;
+      logger.info(`Found blob in state PROCESSING ${id}`);
       debug(`Queuing to bulk blob ${id}`);
       await blobImportHandler.startHandling(id);
       return logic();
     }
 
-    const transformedBlobInfo = await processBlobState(profileIds, BLOB_STATE.TRANSFORMED, importOfflinePeriod);
+    const transformedBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: BLOB_STATE.TRANSFORMED, importOfflinePeriod});
     if (transformedBlobInfo) {
       debug(`Found blob in state TRANSFORMED: ${JSON.stringify(transformedBlobInfo)}`);
       const {id} = transformedBlobInfo;
+      logger.info(`Found blob in state TRANSFORMED ${id}`);
       debug(`Start handling blob ${id}`);
       await mongoOperator.updateBlob({
         id,
@@ -99,33 +103,6 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       const parsedBlobInfo = parseBlobInfo(blobInfo);
       webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
       return;
-    }
-
-    async function processBlobState(profileIds, state, importOfflinePeriod) {
-      if (!isOfflinePeriod(importOfflinePeriod)) {
-        const queryResult = [];
-        await new Promise((resolve, reject) => {
-          const emitter = mongoOperator.queryBlob({
-            limit: 1,
-            getAll: false,
-            profile: profileIds.join(','),
-            state
-          });
-          emitter.on('blobs', blobs => blobs.forEach(blob => queryResult.push(blob))) // eslint-disable-line functional/immutable-data
-            .on('error', error => reject(error))
-            .on('end', () => resolve());
-        });
-
-        const [blobInfo] = queryResult;
-        // debug(`No blobs in ${state} found for ${profileIds}`);
-        if (blobInfo) {
-          return blobInfo;
-        }
-
-        return false;
-      }
-
-      return false;
     }
   }
 
@@ -168,7 +145,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
   function logWait(waitTime) {
     // 60000ms = 1min
     if (waitTime % 60000 === 0) {
-      return debug(`Total wait: ${prettyPrint(waitTime)}`);
+      return logger.info(`Total wait: ${prettyPrint(waitTime)}`);
     }
   }
 }
