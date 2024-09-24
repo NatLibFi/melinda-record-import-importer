@@ -13,6 +13,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
   const setTimeoutPromise = promisify(setTimeout);
   const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
   const webhookAlertOperator = createWebhookOperator(config.notifications.alertUrl);
+  logger.info(`Starting melinda record import importer profile: ${config.profileIds}`);
   await logic();
 
   async function logic(wait = false, waitSinceLastOp = 0) {
