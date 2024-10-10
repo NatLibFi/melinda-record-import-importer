@@ -40,6 +40,18 @@ const logger = createLogger();
 export async function handleBulkResult(mongoOperator, blobId, bulkImportResults) {
   debug('handleBulkresult Begun');
 
+  if (bulkImportResults.queueItemState === 'ERROR' || bulkImportResults.queueItemState === 'ABORT') {
+    logger.info('Blob aborted');
+    await mongoOperator.updateBlob({
+      id: blobId,
+      payload: {
+        op: BLOB_UPDATE_OPERATIONS.updateState,
+        state: BLOB_STATE.ABORTED
+      }
+    });
+    return false;
+  }
+
   if (bulkImportResults.records === undefined) {
     logger.info('All records imported');
     await mongoOperator.updateBlob({
@@ -50,18 +62,6 @@ export async function handleBulkResult(mongoOperator, blobId, bulkImportResults)
       }
     });
 
-    return false;
-  }
-
-  if (bulkImportResults.queueItemState === 'ERROR' || bulkImportResults.queueItemState === 'ABORT') {
-    logger.info('Blob aborted');
-    await mongoOperator.updateBlob({
-      id: blobId,
-      payload: {
-        op: BLOB_UPDATE_OPERATIONS.updateState,
-        state: BLOB_STATE.ABORTED
-      }
-    });
     return false;
   }
 
