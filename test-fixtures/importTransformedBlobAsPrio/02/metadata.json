@@ -1,5 +1,5 @@
 {
-  "description": "Handle transformed blob - Importing, 2 CREATE messages",
+  "description": "Handle transformed blob - Importing, 1 CREATE messages",
   "only": false,
   "skip": false,
   "configs": {
@@ -13,65 +13,26 @@
     "noopMelindaImport": false,
     "uniqueMelindaImport": true
   },
-  "requests": [
+  "responses": [
     {
-      "step": "Auth user",
-      "response": "01",
       "method": "post",
-      "url": "/auth",
-      "status": 204,
-      "responseHeaders": {
-        "Token": "0-0-0"
+      "url": "http://foo.bar/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
+      "res": {
+        "databaseId": "000123456",
+        "recordMetadata": {
+          "sourceIds": [
+            "(FI-FOOBAR)123456"
+          ],
+          "title": "Malli title :",
+          "standardIdentifiers": [
+            "978-952-11-0000-0"
+          ],
+          "blobSequence": 1
+        },
+        "recordStatus": "CREATED",
+        "detailedRecordStatus": "CREATED",
+        "message": "Created record 000123456"
       }
-    },
-    {
-      "step": "get blob metadata for state === not aborted",
-      "response": "02",
-      "method": "get",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "step": "post record to rest api",
-      "response": "03",
-      "method": "post",
-      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
-      "status": 201
-    },
-    {
-      "step": "put record blob",
-      "response": "04",
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "step": "get blob metadata for state === not aborted",
-      "response": "05",
-      "method": "get",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "step": "post record to rest api",
-      "response": "06",
-      "method": "post",
-      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
-      "status": 201
-    },
-    {
-      "step": "put record blob",
-      "response": "07",
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "step": "put blob state update PROCESSED",
-      "response": "08",
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
     }
   ]
 }

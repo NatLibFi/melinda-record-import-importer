@@ -25,6 +25,8 @@ jobs:
         cache: 'npm'
       env:
         NPM_CONFIG_IGNORE_SCRIPTS: true
+        MONGOMS_DOWNLOAD_URL: https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel80-7.0.12.tgz
+        MONGOMS_VERSION: 7.0.12
     - run: npm audit --package-lock-only --production --audit-level=high
     - run: npm i
     - run: npm test

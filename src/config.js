@@ -25,18 +25,6 @@ export const messageOptions = {
 };
 export const smtpConfig = readEnvironmentVariable('SMTP_CONFIG', {defaultValue: false, format: JSON.parse});
 
-export const recordImportApiOptions = {
-  recordImportApiUrl: readEnvironmentVariable('RECORD_IMPORT_API_URL', {defaultValue: 'RECORD_IMPORT_API_URL env is not set!'}),
-  userAgent: readEnvironmentVariable('API_CLIENT_USER_AGENT', {defaultValue: '_RECORD-IMPORT-IMPORTER'}),
-  allowSelfSignedApiCert: readEnvironmentVariable('ALLOW_API_SELF_SIGNED', {defaultValue: false, format: parseBoolean})
-};
-
-export const keycloakOptions = {
-  issuerBaseURL: readEnvironmentVariable('KEYCLOAK_ISSUER_BASE_URL', {defaultValue: 'KEYCLOAK_ISSUER_BASE_URL env is not set!'}),
-  serviceClientID: readEnvironmentVariable('KEYCLOAK_SERVICE_CLIENT_ID', {defaultValue: 'KEYCLOAK_SERVICE_CLIENT_ID env is not set!'}),
-  serviceClientSecret: readEnvironmentVariable('KEYCLOAK_SERVICE_CLIENT_SECRET', {defaultValue: 'KEYCLOAK_SERVICE_CLIENT_SECRET env is not set!'})
-};
-
 export const melindaRestApiOptions = {
   melindaApiUrl: readEnvironmentVariable('MELINDA_REST_API_URL', {defaultValue: 'MELINDA_REST_API_URL env is not set!'}),
   melindaApiUsername: readEnvironmentVariable('MELINDA_REST_API_USERNAME', {defaultValue: 'MELINDA_REST_API_USERNAME env is not set!'}),

@@ -13,21 +13,5 @@
     "noopMelindaImport": false,
     "uniqueMelindaImport": true
   },
-  "requests": [
-    {
-      "step": "Auth user",
-      "method": "post",
-      "url": "/auth",
-      "status": 204,
-      "responseHeaders": {
-        "Token": "0-0-0"
-      }
-    },
-    {
-      "step": "put blob state update PROCESSED",
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
-    }
-  ]
+  "responses": []
 }

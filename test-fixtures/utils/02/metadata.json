@@ -1,0 +1,6 @@
+{
+  "description": "Parsing failed tabletop to record info",
+  "only": false,
+  "skip": false,
+  "method": "failedRecordsCollector"
+}

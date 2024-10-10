@@ -13,81 +13,25 @@
     "noopMelindaImport": false,
     "uniqueMelindaImport": true
   },
-  "requests": [
+  "responses": [
     {
       "method": "post",
-      "response": "01",
-      "url": "/auth",
-      "status": 204,
-      "responseHeaders": {
-        "Token": "0-0-0"
-      }
-    },
-    {
-      "method": "get",
-      "response": "02",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "method": "post",
-      "response": "03",
-      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
-      "status": 200,
-      "responseHeaders": {
-        "Record-ID": "000000001"
-      }
-    },
-    {
-      "method": "put",
-      "response": "04",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "method": "get",
-      "response": "05",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "method": "post",
-      "response": "06",
-      "url": "/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
-      "status": 200,
-      "responseHeaders": {
-        "Record-ID": "000000002"
-      }
-    },
-    {
-      "method": "put",
-      "response": "07",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "method": "put",
-      "response": "08",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "method": "post",
-      "url": "/blobs/000",
-      "status": 200,
-      "requestHeaders": {
-        "user-agent": [
-          "test"
-        ],
-        "content-type": [
-          "application/json"
-        ],
-        "authorization": [
-          "123456789SecretTestToken!"
-        ],
-        "accept": [
-          "html"
-        ]
+      "url": "http://foo.bar/?noop=0&unique=1&merge=0&cataloger=LOAD_IMP",
+      "res": {
+        "databaseId": "000123456",
+        "recordMetadata": {
+          "sourceIds": [
+            "(FI-FOOBAR)123456"
+          ],
+          "title": "Malli title :",
+          "standardIdentifiers": [
+            "978-952-11-0000-0"
+          ],
+          "blobSequence": 1
+        },
+        "recordStatus": "UPDATED",
+        "detailedRecordStatus": "UPDATED",
+        "message": "Record 000123456 has been updated"
       }
     }
   ]

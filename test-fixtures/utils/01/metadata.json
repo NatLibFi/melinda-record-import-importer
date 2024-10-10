@@ -1,0 +1,6 @@
+{
+  "description": "Parsing 2 failed records to record info",
+  "only": false,
+  "skip": false,
+  "method": "failedRecordsCollector"
+}

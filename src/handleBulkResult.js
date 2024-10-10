@@ -27,31 +27,55 @@
 //   "modificationTime": "2022-04-26T10:56:48.186Z"
 // }
 
-import {BLOB_STATE} from '@natlibfi/melinda-record-import-commons';
+import {BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import {recordDataBuilder} from './utils';
 import createDebugLogger from 'debug';
 import {promisify} from 'util';
+import {createLogger} from '@natlibfi/melinda-backend-commons';
 
 const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults');
+const logger = createLogger();
 
-export async function handleBulkResult(riApiClient, blobId, bulkImportResults) {
+export async function handleBulkResult(mongoOperator, blobId, bulkImportResults) {
   debug('handleBulkresult Begun');
 
-  if (bulkImportResults.records === undefined) {
-    await riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSED});
+  if (bulkImportResults.queueItemState === 'ERROR' || bulkImportResults.queueItemState === 'ABORT') {
+    logger.info('Blob aborted');
+    await mongoOperator.updateBlob({
+      id: blobId,
+      payload: {
+        op: BLOB_UPDATE_OPERATIONS.updateState,
+        state: BLOB_STATE.ABORTED
+      }
+    });
     return false;
   }
 
-  if (bulkImportResults.queueItemState === 'ERROR' || bulkImportResults.queueItemState === 'ABORT') {
-    await riApiClient.setAborted({id: blobId});
+  if (bulkImportResults.records === undefined) {
+    logger.info('All records imported');
+    await mongoOperator.updateBlob({
+      id: blobId,
+      payload: {
+        op: BLOB_UPDATE_OPERATIONS.updateState,
+        state: BLOB_STATE.PROCESSED
+      }
+    });
+
     return false;
   }
 
   debug('handleBulkresult Processing records');
   const records = await processRecordData(bulkImportResults.records);
 
-  await riApiClient.updateState({id: blobId, state: BLOB_STATE.PROCESSED});
+  logger.info('All records imported');
+  await mongoOperator.updateBlob({
+    id: blobId,
+    payload: {
+      op: BLOB_UPDATE_OPERATIONS.updateState,
+      state: BLOB_STATE.PROCESSED
+    }
+  });
   return records;
 
   async function processRecordData(recordsData, handledRecords = []) {
@@ -62,13 +86,20 @@ export async function handleBulkResult(riApiClient, blobId, bulkImportResults) {
       return handledRecords;
     }
 
-    const recordData = recordDataBuilder(record);
+    const {status, metadata} = recordDataBuilder(record);
     // To be done remove queued item from blob
 
-    debug(`Record data: ${JSON.stringify(recordData)}`);
+    debug(`Record status: ${JSON.stringify(status)}`);
+    debug(`Record metadata: ${JSON.stringify(metadata)}`);
 
-    await riApiClient.setRecordProcessed({id: blobId, ...recordData});
+    await mongoOperator.updateBlob({
+      id: blobId,
+      payload: {
+        op: BLOB_UPDATE_OPERATIONS.recordProcessed,
+        status, metadata
+      }
+    });
     await setTimeoutPromise(2);
-    return processRecordData(rest, [...handledRecords, recordData]);
+    return processRecordData(rest, [...handledRecords, {status, metadata}]);
   }
 }
