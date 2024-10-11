@@ -48,12 +48,12 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
       if (!recordsSet) {
         webhookAlertOperator.sendNotification({text: `Rest-api queue item state: ${importResults.queueItemState}, id: ${id}, correlationId: ${correlationId}`});
-        return logic();
+        return logic(true);
       }
 
       await handleNoticfications(id);
 
-      return logic();
+      return logic(true);
     }
 
     const processingQueueBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: BLOB_STATE.PROCESSING, importOfflinePeriod});
@@ -124,7 +124,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
       await melindaRestApiClient.setBulkStatus(melindaRestApiCorrelationId, 'ABORT');
 
-      return logic();
+      return logic(true);
     }
 
     const poller = pollMelindaRestApi(melindaRestApiClient, melindaRestApiCorrelationId, true);
@@ -138,7 +138,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
     }
 
     debug(`Current Melinda rest api item status: ${pollResults.queueItemState}`);
-    await setTimeoutPromise(1000);
+    await setTimeoutPromise(2000);
 
     return pollResultHandling(melindaRestApiClient, recordImportBlobId, melindaRestApiCorrelationId);
   }
