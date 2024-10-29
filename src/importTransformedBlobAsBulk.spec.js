@@ -16,7 +16,7 @@ const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:import
 let mongoFixtures; // eslint-disable-line functional/no-let
 const amqpUrl = 'amqp://foo.bar/';
 const melindaApiClient = createMelindaApiRecordClient({
-  melindaApiUrl: 'http://foo.bar/',
+  melindaApiUrl: 'http://foo.bar',
   melindaApiUsername: 'foo',
   melindaApiPassword: 'bar'
 });
