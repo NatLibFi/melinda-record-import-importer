@@ -129,7 +129,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
     const poller = pollMelindaRestApi(melindaRestApiClient, melindaRestApiCorrelationId, true);
     const pollResults = await poller();
-    debug(`Got pollResults ${JSON.stringify(pollResults)}`);
+    debug('Got pollResults');
 
     if (finalQueueItemStates.includes(pollResults.queueItemState)) {
       debug(`Melinda rest api item has made to final state ${pollResults.queueItemState}`);
