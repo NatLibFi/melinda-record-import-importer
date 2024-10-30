@@ -94,7 +94,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
         const importResults = blobInfo?.processingInfo?.importResults || [];
         const parsedFailedRecords = failedRecordsCollector(blobInfo?.processingInfo?.failedRecords);
         const recordInfo = [...importResults, ...parsedFailedRecords];
-        messageOptions.context = {recordInfo}; // eslint-disable-line functional/immutable-data
+        messageOptions.context = {recordInfo, blobId: id}; // eslint-disable-line functional/immutable-data
         sendEmail({messageOptions, smtpConfig});
 
         debug('Sending notification to slack');
