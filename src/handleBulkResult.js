@@ -76,6 +76,7 @@ export async function handleBulkResult(mongoOperator, blobId, bulkImportResults)
       state: BLOB_STATE.PROCESSED
     }
   });
+
   return records;
 
   async function processRecordData(recordsData, handledRecords = []) {

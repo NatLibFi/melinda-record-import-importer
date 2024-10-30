@@ -85,22 +85,25 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
     return logic(true, waitSinceLastOp);
 
     async function handleNoticfications(id) {
+      debug('Handling notifications');
       const blobInfo = await mongoOperator.readBlob({id});
       const {smtpConfig = false, messageOptions} = config;
       if (blobInfo.notificationEmail !== '' && smtpConfig) {
+        debug('Sending notification mail');
         messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
         const importResults = blobInfo?.processingInfo?.importResults || [];
         const parsedFailedRecords = failedRecordsCollector(blobInfo?.processingInfo?.failedRecords);
         const recordInfo = [...importResults, ...parsedFailedRecords];
-        messageOptions.context = {recordInfo}; // eslint-disable-line functional/immutable-data
+        messageOptions.context = {recordInfo, blobId: id}; // eslint-disable-line functional/immutable-data
         sendEmail({messageOptions, smtpConfig});
 
+        debug('Sending notification to slack');
         const parsedBlobInfo = parseBlobInfo(blobInfo);
         webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
         return;
       }
 
-
+      debug('Sending notification to slack');
       const parsedBlobInfo = parseBlobInfo(blobInfo);
       webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
       return;
@@ -129,7 +132,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
     const poller = pollMelindaRestApi(melindaRestApiClient, melindaRestApiCorrelationId, true);
     const pollResults = await poller();
-    debug(`Got pollResults ${JSON.stringify(pollResults)}`);
+    debug('Got pollResults');
 
     if (finalQueueItemStates.includes(pollResults.queueItemState)) {
       debug(`Melinda rest api item has made to final state ${pollResults.queueItemState}`);

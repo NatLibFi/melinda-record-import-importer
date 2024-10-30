@@ -176,7 +176,7 @@ export default function (mongoOperator, melindaApiClient, amqplib, config) {
       const standardIdentifiers = await getRecordStandardIdentifiers(record);
       debug(`Record data to be sent to queue: Title: ${title}, identifiers: ${standardIdentifiers} to Bulk ${correlationId}`);
       const recordObject = record.toObject();
-      debug(JSON.stringify(recordObject));
+      //debug(JSON.stringify(recordObject));
 
       if (correlationId === 'noop' || noopProcessing || aborted) {
         debug(`${aborted ? 'Blob has been aborted skipping!' : 'NOOP set. Not importing anything'}`);
