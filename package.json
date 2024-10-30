@@ -37,7 +37,7 @@
 	"dependencies": {
 		"@babel/runtime": "^7.23.9",
 		"@natlibfi/marc-record": "^8.1.0",
-		"@natlibfi/melinda-backend-commons": "^2.3.4-alpha.1",
+		"@natlibfi/melinda-backend-commons": "^2.3.4",
 		"@natlibfi/melinda-commons": "^13.0.12",
 		"@natlibfi/melinda-record-import-commons": "^11.0.0",
 		"@natlibfi/melinda-rest-api-client": "^5.1.2",
