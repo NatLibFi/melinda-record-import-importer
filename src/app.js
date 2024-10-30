@@ -88,6 +88,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       const blobInfo = await mongoOperator.readBlob({id});
       const {smtpConfig = false, messageOptions} = config;
       if (blobInfo.notificationEmail !== '' && smtpConfig) {
+        debug('Sending notification mail');
         messageOptions.to = blobInfo.notificationEmail; // eslint-disable-line functional/immutable-data
         const importResults = blobInfo?.processingInfo?.importResults || [];
         const parsedFailedRecords = failedRecordsCollector(blobInfo?.processingInfo?.failedRecords);
@@ -95,12 +96,13 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
         messageOptions.context = {recordInfo}; // eslint-disable-line functional/immutable-data
         sendEmail({messageOptions, smtpConfig});
 
+        debug('Sending notification to slack');
         const parsedBlobInfo = parseBlobInfo(blobInfo);
         webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
         return;
       }
 
-
+      debug('Sending notification to slack');
       const parsedBlobInfo = parseBlobInfo(blobInfo);
       webhookStatusOperator.sendNotification(parsedBlobInfo, {template: 'blob', ...config.notifications});
       return;
