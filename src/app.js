@@ -85,6 +85,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
     return logic(true, waitSinceLastOp);
 
     async function handleNoticfications(id) {
+      debug('Handling notifications');
       const blobInfo = await mongoOperator.readBlob({id});
       const {smtpConfig = false, messageOptions} = config;
       if (blobInfo.notificationEmail !== '' && smtpConfig) {
