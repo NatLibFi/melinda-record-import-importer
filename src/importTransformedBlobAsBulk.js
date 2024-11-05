@@ -103,7 +103,7 @@ export default function (mongoOperator, melindaApiClient, amqplib, config) {
       debug(`got blob data ${id}`);
 
       // Add pCatalogerIn based on blobs profile
-      const pCatalogerIn = cataloger === '' ? profileToCataloger[profile] || 'LOAD_IMP' : cataloger;
+      const pCatalogerIn = cataloger && cataloger.length > 1 ? cataloger : profileToCataloger[profile] || 'LOAD_IMP';
 
       if (correlationId && correlationId !== '') {
         debug(`bulk correlation id: ${correlationId}`);
