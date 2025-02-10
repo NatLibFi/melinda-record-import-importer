@@ -1,4 +1,4 @@
-import {BLOB_STATE, BLOB_UPDATE_OPERATIONS, getNextBlob, checkStatesValidy} from '@natlibfi/melinda-record-import-commons';
+import {BLOB_STATE, BLOB_UPDATE_OPERATIONS, getNextBlob} from '@natlibfi/melinda-record-import-commons';
 import {promisify} from 'util';
 import createDebugLogger from 'debug';
 import prettyPrint from 'pretty-print-ms';
@@ -100,14 +100,15 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       const {smtpConfig = false, messageOptions, notifications} = config;
       await slackNotification(notifications, blobInfo);
 
-      if (blobInfo.notificationEmail === '' || !smtpConfig) {
+      const {notificationEmail, processingInfo} = blobInfo;
+      if (notificationEmail === '' || !smtpConfig) {
         return;
       }
 
       debug('Sending notification mail');
       messageOptions.to = notificationEmail; // eslint-disable-line functional/immutable-data
-      const importResults = blobInfo?.processingInfo?.importResults || [];
-      const parsedFailedRecords = failedRecordsCollector(blobInfo?.processingInfo?.failedRecords);
+      const importResults = processingInfo?.importResults || [];
+      const parsedFailedRecords = failedRecordsCollector(processingInfo?.failedRecords);
       const recordInfo = [...importResults, ...parsedFailedRecords];
       messageOptions.context = {recordInfo, blobId: id}; // eslint-disable-line functional/immutable-data
       return sendEmail({messageOptions, smtpConfig});
