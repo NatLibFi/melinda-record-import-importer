@@ -2,7 +2,6 @@ import {readEnvironmentVariable} from '@natlibfi/melinda-backend-commons';
 import {parseBoolean} from '@natlibfi/melinda-commons';
 
 export const profileIds = readEnvironmentVariable('PROFILE_IDS', {format: v => JSON.parse(v)});
-export const profileToCataloger = readEnvironmentVariable('PROFILE_TO_CATALOGER', {format: v => JSON.parse(v)});
 export const amqpUrl = readEnvironmentVariable('AMQP_URL', {defaultValue: 'amqp://127.0.0.1:5672/'});
 export const mongoUrl = readEnvironmentVariable('MONGO_URI', {defaultValue: false});
 
@@ -10,13 +9,16 @@ export const importOfflinePeriod = readEnvironmentVariable('IMPORT_OFFLINE_PERIO
 
 export const logLevel = readEnvironmentVariable('LOG_LEVEL', {defaultValue: 'info'});
 
-export const sendAsUpdate = readEnvironmentVariable('SEND_AS_UPDATE', {defaultValue: false, format: parseBoolean});
-export const noopProcessing = readEnvironmentVariable('NOOP_PROCESSING', {defaultValue: false, format: parseBoolean});
-export const noopMelindaImport = readEnvironmentVariable('NOOP_MELINDA_IMPORT', {defaultValue: false, format: parseBoolean});
-export const uniqueMelindaImport = readEnvironmentVariable('UNIQUE_MELINDA_IMPORT', {defaultValue: true, format: parseBoolean});
-export const mergeMelindaImport = readEnvironmentVariable('MERGE_MELINDA_IMPORT', {defaultValue: false, format: parseBoolean});
-export const importAsBulk = readEnvironmentVariable('IMPORT_AS_BULK', {defaultValue: true, format: parseBoolean});
-export const saveImportLogsToBlob = readEnvironmentVariable('SAVE_IMPORT_LOGS_TO_BLOB', {defaultValue: false, format: parseBoolean});
+export const pullState = readEnvironmentVariable('PULL_STATE', {defaultValue: 'TRANSFORMED'});
+
+export const importOptions = {
+  profileToCataloger: readEnvironmentVariable('PROFILE_TO_CATALOGER', {format: v => JSON.parse(v)}),
+  noopProcessing: readEnvironmentVariable('NOOP_PROCESSING', {defaultValue: false, format: parseBoolean}),
+  sendAsUpdate: readEnvironmentVariable('SEND_AS_UPDATE', {defaultValue: false, format: parseBoolean}),
+  noopMelindaImport: readEnvironmentVariable('NOOP_MELINDA_IMPORT', {defaultValue: false, format: parseBoolean}),
+  uniqueMelindaImport: readEnvironmentVariable('UNIQUE_MELINDA_IMPORT', {defaultValue: true, format: parseBoolean}),
+  mergeMelindaImport: readEnvironmentVariable('MERGE_MELINDA_IMPORT', {defaultValue: false, format: parseBoolean})
+};
 
 export const messageOptions = {
   from: readEnvironmentVariable('MESSAGE_FROM', {defaultValue: false}),
@@ -34,6 +36,6 @@ export const melindaRestApiOptions = {
 export const notifications = {
   statusUrl: readEnvironmentVariable('NOTIFICATION_STATUS_URL', {defaultValue: 'NOTIFICATION_STATUS_URL env is not set!'}),
   alertUrl: readEnvironmentVariable('NOTIFICATION_ALERT_URL', {defaultValue: 'NOTIFICATION_ALERT_URL env is not set!'}),
-  environment: readEnvironmentVariable('NOTIFICATION_ENVIRONMENT', {defaultValue: 'TEST'}),
+  environment: readEnvironmentVariable('NOTIFICATION_ENVIRONMENT', {defaultValue: 'LOCAL'}),
   linkUrl: readEnvironmentVariable('NOTIFICATION_LINK_URL', {defaultValue: 'NOTIFICATION_LINK_URL env is not set!'})
 };

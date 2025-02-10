@@ -1,13 +1,16 @@
 [
   {
     "metadata": {
-      "id": "001234567",
-      "message": "",
-      "sourceIds": ["(MALLI)0239734"],
-      "standardIdentifiers": [
-        "978-952-373-345-9"
+      "id": "011188649",
+      "message": "Found 1 matching records in the database. - Merged to 011188649 preferring database record. - No changes detected while trying to update existing record 011188649, update skipped.",
+      "sourceIds": [
+        "(examp)000000000"
       ],
-      "title": "example"
+      "standardIdentifiers": [
+        "978-952-000-000-x"
+      ],
+      "title": "Example title",
+      "recordStatusNote": "SKIPPED_CHANGE"
     },
     "status": "SKIPPED"
   }

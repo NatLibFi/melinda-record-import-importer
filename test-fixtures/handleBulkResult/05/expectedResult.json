@@ -27,7 +27,7 @@
       "cataloger": "",
       "notificationEmail": "",
       "contentType": "application/json",
-      "state": "PROCESSED"
+      "state": "TRANSFORMED"
     }
   ]
 }

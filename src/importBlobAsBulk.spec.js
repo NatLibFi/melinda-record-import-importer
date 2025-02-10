@@ -1,18 +1,20 @@
+import createDebugLogger from 'debug';
+import amqplib from '@onify/fake-amqplib';
 import {expect} from 'chai';
+import HttpRequestMock from 'http-request-mock';
 
 import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen';
 import mongoFixturesFactory from '@natlibfi/fixura-mongo';
-import {createMongoBlobsOperator} from '@natlibfi/melinda-record-import-commons';
-import HttpRequestMock from 'http-request-mock';
+import {createMongoBlobsOperator, createAmqpOperator} from '@natlibfi/melinda-record-import-commons';
 import {createMelindaApiRecordClient} from '@natlibfi/melinda-rest-api-client';
 
-import {handleBulkResult} from './handleBulkResult';
+import blobImportHandlerFactory from './importBlobAsBulk';
 
-import createDebugLogger from 'debug';
-const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults:test');
+const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importBlobAsBulk:test');
+
 let mongoFixtures; // eslint-disable-line functional/no-let
-let mocker; // eslint-disable-line functional/no-let
+let amqpOperator; // eslint-disable-line functional/no-let
 const melindaRestApiClient = createMelindaApiRecordClient({
   melindaApiUrl: 'http://foo.bar',
   melindaApiUsername: 'foo',
@@ -21,7 +23,7 @@ const melindaRestApiClient = createMelindaApiRecordClient({
 
 generateTests({
   callback,
-  path: [__dirname, '..', 'test-fixtures', 'handleBulkResult'],
+  path: [__dirname, '..', 'test-fixtures', 'importBlobAsBulk'],
   recurse: false,
   useMetadataFile: true,
   fixura: {
@@ -31,32 +33,32 @@ generateTests({
   mocha: {
     before: async () => {
       await initMongofixtures();
-      mocker = HttpRequestMock.setup();
     },
     beforeEach: async () => {
       await mongoFixtures.clear();
-      mocker.reset();
     },
     afterEach: async () => {
       await mongoFixtures.clear();
+      amqplib.resetMock();
     },
     after: async () => {
       await mongoFixtures.close();
-      mocker = null;
     }
   }
 });
 
 async function initMongofixtures() {
   mongoFixtures = await mongoFixturesFactory({
-    rootPath: [__dirname, '..', 'test-fixtures', 'handleBulkResult'],
+    rootPath: [__dirname, '..', 'test-fixtures', 'importTransformedBlobAsBulk'],
     useObjectId: true
   });
 }
 
 async function callback({
   getFixture,
-  responses = [],
+  configs,
+  responses,
+  expectedReturnValue,
   expectedToFail = false,
   expectedErrorStatus = 200,
   expectedErrorMessage = ''
@@ -64,27 +66,38 @@ async function callback({
   const mongoUri = await mongoFixtures.getUri();
   await mongoFixtures.populate(getFixture('dbContents.json'));
   const mongoOperator = await createMongoBlobsOperator(mongoUri, '');
+
   const expectedResults = await getFixture('expectedResult.json');
-  const expectedOutputResults = getFixture('output.json');
+  const messages = getFixture('messages.json');
+  const mocker = HttpRequestMock.setup();
 
-  // Http request interceptions
-  if (responses.length > 0) { // eslint-disable-line functional/no-conditional-statements
-    const mockers = setupHttpMock(responses);
-    expect(mockers.length).to.eql(responses.length);
-    debug(`http mockers set ${mockers.length} / ${responses.length}`);
-  }
-
-  // debug(importResults);
-  // debug(expectedResults);
+  // Messages to AMQP queue
   try {
-    const handledRecords = await handleBulkResult(mongoOperator, melindaRestApiClient, {blobId: '000', correlationId: '0-0-0'});
-    // debug(handledRecords);
-    expect(handledRecords).to.deep.equal(expectedOutputResults);
-    const dump = dumpParser(await mongoFixtures.dump());
-    expect(dump).to.eql(expectedResults);
+    debug('Connecting to amqplib');
+    amqpOperator = await createAmqpOperator(amqplib, configs.amqpUrl);
+    const {blobId, pullState} = configs;
+    const amqpResponse = await amqpOperator.countQueue({blobId, status: pullState});
+    debug(`${amqpResponse}`);
 
+    if (messages.length > 0) { // eslint-disable-line functional/no-conditional-statements
+      debug(`Queuing ${messages.length} messages`);
+      const messagePromises = messages.map(message => amqpOperator.sendToQueue({blobId, status: pullState, data: message}));
+      await Promise.all(messagePromises);
+    }
+    // Http request interceptions
+    if (responses.length > 0) { // eslint-disable-line functional/no-conditional-statements
+      const mockers = setupHttpMock(responses);
+      expect(mockers.length).to.eql(responses.length);
+    }
+
+    const blobImportHandler = blobImportHandlerFactory(mongoOperator, amqpOperator, melindaRestApiClient, configs);
+    const returnValue = await blobImportHandler.startHandling(configs.blobId);
+    const dump = dumpParser(await mongoFixtures.dump());
+    expect(returnValue).to.eql(expectedReturnValue);
+    expect(dump).to.eql(expectedResults);
   } catch (error) {
     if (!expectedToFail) {
+      console.log(error); // eslint-disable-line
       throw error;
     }
 

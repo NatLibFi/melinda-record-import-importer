@@ -1,15 +1,16 @@
 [
   {
     "metadata": {
-      "id": "001234567",
-      "message": "",
+      "id": "000000000",
+      "message": "Duplicates in database",
       "sourceIds": [
-        "(MALLI)0239734"
+        "(examp)00000"
       ],
       "standardIdentifiers": [
-        "978-952-373-345-9"
+        "978-952-000-000-x"
       ],
-      "title": "example"
+      "title": "Example title 1",
+      "recordStatusNote": "DUPLICATE"
     },
     "status": "DUPLICATE"
   }

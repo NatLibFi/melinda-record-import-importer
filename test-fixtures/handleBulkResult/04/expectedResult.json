@@ -7,15 +7,16 @@
         "importResults": [
           {
             "metadata": {
-              "id": "001234567",
-              "message": "",
+              "id": "011188649",
+              "message": "Found 1 matching records in the database. - Merged to 011188649 preferring database record. - No changes detected while trying to update existing record 011188649, update skipped.",
               "sourceIds": [
-                "(MALLI)0239734"
+                "(examp)000000000"
               ],
               "standardIdentifiers": [
-                "978-952-373-345-9"
+                "978-952-000-000-x"
               ],
-              "title": "example"
+              "title": "Example title",
+              "recordStatusNote": "SKIPPED_CHANGE"
             },
             "status": "SKIPPED"
           }
@@ -27,7 +28,7 @@
       "cataloger": "",
       "notificationEmail": "",
       "contentType": "application/json",
-      "state": "PROCESSED"
+      "state": "TRANSFORMED"
     }
   ]
 }
