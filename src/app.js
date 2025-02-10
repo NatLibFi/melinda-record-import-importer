@@ -9,7 +9,6 @@ import {handleBulkResult} from './handleBulkResult';
 export async function startApp(config, mongoOperator, melindaRestApiClient, blobImportHandler) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
   const devDebug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp:dev');
-  devDebug(`test`);
 
   const logger = createLogger();
   const setTimeoutPromise = promisify(setTimeout);
@@ -49,7 +48,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
         }
       });
 
-      await handleNoticfications(id);
+      await handleNotifications(id);
       return logic();
     }
     // Check if blobs
@@ -94,7 +93,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
 
     return logic(true, waitSinceLastOp);
 
-    async function handleNoticfications(id) {
+    async function handleNotifications(id) {
       debug('Handling notifications');
       const blobInfo = await mongoOperator.readBlob({id});
       const {smtpConfig = false, messageOptions, notifications} = config;
