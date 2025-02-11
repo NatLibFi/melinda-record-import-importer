@@ -7,7 +7,7 @@
         "importResults": []
       },
       "id": "000",
-      "correlationId": "0-0-0",
+      "correlationId": "noop",
       "profile": "profile",
       "cataloger": "",
       "notificationEmail": "",

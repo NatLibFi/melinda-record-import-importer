@@ -28,17 +28,27 @@
 // }
 
 import {BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
-import {recordDataBuilder} from './utils';
 import createDebugLogger from 'debug';
 import {promisify} from 'util';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
+import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 
 const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults');
 const logger = createLogger();
 
-export async function handleBulkResult(mongoOperator, blobId, bulkImportResults) {
-  debug('handleBulkresult Begun');
+export async function handleBulkResult(mongoOperator, melindaRestApiClient, {blobId, correlationId}) {
+  debug('handleBulkResult Begun');
+
+  if (correlationId === 'noop') {
+    return true;
+  }
+
+  const bulkImportResults = await pollRestStatus(melindaRestApiClient, blobId, correlationId);
+
+  if (!bulkImportResults) {
+    return false;
+  }
 
   if (bulkImportResults.queueItemState === 'ERROR' || bulkImportResults.queueItemState === 'ABORT') {
     logger.info('Blob aborted');
@@ -53,29 +63,12 @@ export async function handleBulkResult(mongoOperator, blobId, bulkImportResults)
   }
 
   if (bulkImportResults.records === undefined) {
-    logger.info('All records imported');
-    await mongoOperator.updateBlob({
-      id: blobId,
-      payload: {
-        op: BLOB_UPDATE_OPERATIONS.updateState,
-        state: BLOB_STATE.PROCESSED
-      }
-    });
-
-    return false;
+    logger.info('No record results from rest');
+    return true;
   }
 
   debug('handleBulkresult Processing records');
   const records = await processRecordData(bulkImportResults.records);
-
-  logger.info('All records imported');
-  await mongoOperator.updateBlob({
-    id: blobId,
-    payload: {
-      op: BLOB_UPDATE_OPERATIONS.updateState,
-      state: BLOB_STATE.PROCESSED
-    }
-  });
 
   return records;
 
@@ -100,7 +93,58 @@ export async function handleBulkResult(mongoOperator, blobId, bulkImportResults)
         status, metadata
       }
     });
-    await setTimeoutPromise(2);
+    await setTimeoutPromise(5);
     return processRecordData(rest, [...handledRecords, {status, metadata}]);
+  }
+
+  async function pollRestStatus(melindaRestApiClient, blobId, correlationId) {
+    const finalQueueItemStates = ['DONE', 'ERROR', 'ABORT'];
+    debug('Getting blob metadata');
+    const metadata = await mongoOperator.readBlob({id: blobId});
+    debug(`Got blob metadata from record import, state: ${metadata.state}`);
+
+    if (metadata.state === BLOB_STATE.ABORTED) {
+      debug('Blob state is set to ABORTED. Stopping rest api');
+      await melindaRestApiClient.setBulkStatus(correlationId, 'ABORT');
+      return false;
+    }
+
+    const poller = pollMelindaRestApi(melindaRestApiClient, correlationId, true);
+    const pollResults = await poller();
+    debug('Got pollResults');
+
+    if (finalQueueItemStates.includes(pollResults.queueItemState)) {
+      debug(`Melinda rest api item has made to final state ${pollResults.queueItemState}`);
+
+      return pollResults;
+    }
+
+    debug(`Current Melinda rest api item status: ${pollResults.queueItemState}`);
+    await setTimeoutPromise(2000);
+
+    return pollRestStatus(melindaRestApiClient, blobId, correlationId);
+  }
+
+  function recordDataBuilder(result) {
+    const {recordStatus, message, ids, detailedRecordStatus, databaseId, recordMetadata = {}} = result;
+    const {sourceIds, title, standardIdentifiers} = recordMetadata;
+
+    const metadata = {
+      id: databaseId,
+      title,
+      standardIdentifiers,
+      sourceIds,
+      message,
+      recordStatusNote: detailedRecordStatus
+    };
+
+    // eslint-disable-next-line functional/immutable-data
+    Object.keys(metadata).forEach(key => metadata[key] === undefined && delete metadata[key]);
+
+    if (ids) {
+      return {status: recordStatus, ids, metadata};
+    }
+
+    return {status: recordStatus, metadata};
   }
 }

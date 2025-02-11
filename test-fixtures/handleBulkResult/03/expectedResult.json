@@ -7,17 +7,33 @@
         "importResults": [
           {
             "metadata": {
-              "id": "001234567",
-              "message": "Modification history mismatch (CAT)",
+              "id": "000000000",
+              "message": "MatchValidation for all 1 matches failed. 019213590: field 245 (title) failed",
+              "recordStatusNote": "CONFLICT",
               "sourceIds": [
-                "(MALLI)0239734"
+                "(examp)000000000"
               ],
               "standardIdentifiers": [
-                "978-952-373-345-9"
+                "978-952-000-000-x"
               ],
-              "title": "example"
+              "title": "Example title 1"
             },
-            "status": "CONFLICT"
+            "status": "ERROR"
+          },
+          {
+            "metadata": {
+              "id": "000000000",
+              "message": "MatchValidation for all 3 matches failed. 006458435: field 245 (title) failed, 016876215: field 245 (title) failed, 017623444: field 245 (title) failed",
+              "recordStatusNote": "CONFLICT",
+              "sourceIds": [
+                "(examp)000000000000000"
+              ],
+              "standardIdentifiers": [
+                "978-952-00000-0-x"
+              ],
+              "title": "Example title 2"
+            },
+            "status": "ERROR"
           }
         ]
       },
@@ -27,7 +43,7 @@
       "cataloger": "",
       "notificationEmail": "",
       "contentType": "application/json",
-      "state": "PROCESSED"
+      "state": "TRANSFORMED"
     }
   ]
 }

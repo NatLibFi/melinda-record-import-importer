@@ -2,32 +2,48 @@
   "blobmetadatas": [
     {
       "processingInfo": {
-        "numberOfRecords": 1,
+        "numberOfRecords": 2,
         "failedRecords": [],
         "importResults": [
           {
             "metadata": {
-              "id": "001234567",
-              "message": "",
+              "id": "019166813",
               "sourceIds": [
-                "(MALLI)0239734"
+                "(examp)0000189772"
               ],
+              "title": "Example title 1",
               "standardIdentifiers": [
-                "978-952-373-345-9"
+                "978-952-000-000-x"
               ],
-              "title": "example"
+              "recordStatusNote": "UPDATED",
+              "message": "Found 1 matching records in the database. - Merged to 019166813 preferring incoming record. - Updated record 019166813"
+            },
+            "status": "UPDATED"
+          },
+          {
+            "metadata": {
+              "id": "019170692",
+              "sourceIds": [
+                "(examp)0000194212"
+              ],
+              "title": "Example title 2",
+              "standardIdentifiers": [
+                "978-951-000-000-x"
+              ],
+              "recordStatusNote": "UPDATED",
+              "message": "Found 1 matching records in the database. - Merged to 019170692 preferring database record. - Updated record 019170692"
             },
             "status": "UPDATED"
           }
         ]
       },
       "id": "000",
-      "correlationId": "de9c748f-497d-4a60-a1da-6361aef55d69",
+      "correlationId": "0-0-0",
       "profile": "profile",
       "cataloger": "",
       "notificationEmail": "",
       "contentType": "application/json",
-      "state": "PROCESSED"
+      "state": "TRANSFORMED"
     }
   ]
 }

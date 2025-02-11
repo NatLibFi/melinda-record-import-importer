@@ -2,29 +2,72 @@
   "description": "Handle CONFLICT record data",
   "only": false,
   "skip": false,
-  "requests": [
+  "responses": [
     {
-      "method": "post",
-      "url": "/auth",
-      "status": 204,
-      "responseHeaders": {
-        "Token": "0-0-0"
+      "method": "get",
+      "url": "http://foo.bar/bulk/state/0-0-0",
+      "res": {
+        "correlationId": "0-0-0",
+        "queueItemState": "DONE",
+        "modificationTime": "2025-01-01T01:00:01.282Z"
       }
     },
     {
       "method": "get",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
+      "url": "http://foo.bar/bulk/?correlationId=0-0-0&skip=0",
+      "res": [
+        {
+          "correlationId": "0-0-0",
+          "cataloger": "IMP_EXAMP",
+          "oCatalogerIn": "LOAD-EXA",
+          "operation": "CREATE",
+          "contentType": "application/json",
+          "queueItemState": "DONE",
+          "blobSize": 2,
+          "records": [
+            {
+              "databaseId": "000000000",
+              "recordMetadata": {
+                "sourceIds": [
+                  "(examp)000000000"
+                ],
+                "blobSequence": 1,
+                "title": "Example title 1",
+                "standardIdentifiers": [
+                  "978-952-000-000-x"
+                ]
+              },
+              "recordStatus": "ERROR",
+              "detailedRecordStatus": "CONFLICT",
+              "message": "MatchValidation for all 1 matches failed. 019213590: field 245 (title) failed",
+              "ids": [
+                "019213590"
+              ]
+            },
+            {
+              "databaseId": "000000000",
+              "recordMetadata": {
+                "sourceIds": [
+                  "(examp)000000000000000"
+                ],
+                "blobSequence": 2,
+                "title": "Example title 2",
+                "standardIdentifiers": [
+                  "978-952-00000-0-x"
+                ]
+              },
+              "recordStatus": "ERROR",
+              "detailedRecordStatus": "CONFLICT",
+              "message": "MatchValidation for all 3 matches failed. 006458435: field 245 (title) failed, 016876215: field 245 (title) failed, 017623444: field 245 (title) failed",
+              "ids": [
+                "006458435",
+                "016876215",
+                "017623444"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

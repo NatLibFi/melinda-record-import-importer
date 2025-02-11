@@ -1,13 +1,31 @@
 [
   {
     "metadata": {
-      "id": "001234567",
-      "message": "",
-      "sourceIds": ["(MALLI)0239734"],
-      "standardIdentifiers": [
-        "978-952-373-345-9"
+      "id": "019166813",
+      "sourceIds": [
+        "(examp)0000189772"
       ],
-      "title": "example"
+      "title": "Example title 1",
+      "standardIdentifiers": [
+        "978-952-000-000-x"
+      ],
+      "recordStatusNote": "UPDATED",
+      "message": "Found 1 matching records in the database. - Merged to 019166813 preferring incoming record. - Updated record 019166813"
+    },
+    "status": "UPDATED"
+  },
+  {
+    "metadata": {
+      "id": "019170692",
+      "sourceIds": [
+        "(examp)0000194212"
+      ],
+      "title": "Example title 2",
+      "standardIdentifiers": [
+        "978-951-000-000-x"
+      ],
+      "recordStatusNote": "UPDATED",
+      "message": "Found 1 matching records in the database. - Merged to 019170692 preferring database record. - Updated record 019170692"
     },
     "status": "UPDATED"
   }
