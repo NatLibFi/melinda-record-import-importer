@@ -80,6 +80,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       devDebug(`Found blob in state ${pullState}: ${JSON.stringify(pullStateBlobInfo)}`);
       const {id} = pullStateBlobInfo;
       logger.info(`Found blob in state ${pullState} ${id}`);
+      await setTimeoutPromise(50); // Some time for records to get in queues
       devDebug(`Start handling blob ${id}`);
       await mongoOperator.updateBlob({
         id,
