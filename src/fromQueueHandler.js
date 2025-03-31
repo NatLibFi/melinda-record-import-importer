@@ -13,7 +13,7 @@ export async function readFromQueue(mongoOperator, amqpOperator, melindaRestApiC
   // debug(chunk);
 
   try {
-    if (chunk.messages && chunk.messages.length > 1) { // eslint-disable-line
+    if (chunk.messages && chunk.messages.length > 0) { // eslint-disable-line
       debug(`Message received`);
       const {state} = await mongoOperator.readBlob({id: blobId});
       const isAborted = state === RECORD_IMPORT_STATE.ABORTED;
