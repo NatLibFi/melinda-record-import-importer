@@ -37,9 +37,11 @@ export default function (mongoOperator, amqpOperator, melindaRestApiClient, conf
         const {queueItemState} = await melindaRestApiClient.getBulkState(correlationId);
         if (queueItemState === 'WAITING_FOR_RECORDS') {
           await melindaRestApiClient.setBulkStatus(correlationId, 'PENDING_VALIDATION');
+          await amqpOperator.deleteQueue({blobId, status: pullState});
           return true;
         }
 
+        await amqpOperator.deleteQueue({blobId, status: pullState});
         return true;
       }
 
