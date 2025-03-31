@@ -45,6 +45,7 @@ export default function (mongoOperator, amqpOperator, melindaRestApiClient, conf
 
       // if 0 queued items => processed
       if (!hasMessages && !hasCorrelationId) {
+        await amqpOperator.deleteQueue({blobId, status: pullState});
         logger.info('No records in queue => PROCESSED');
         return true;
       }
