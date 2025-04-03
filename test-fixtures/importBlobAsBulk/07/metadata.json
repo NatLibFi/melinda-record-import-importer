@@ -1,5 +1,5 @@
 {
-  "description": "Handle transformed blob - 2 messages => CorrelationId 0-0-0 => all records sent => Return false",
+  "description": "Handle transformed blob - 2 messages => set CorrelationId 0-0-0 => Return false",
   "only": false,
   "skip": false,
   "configs": {
@@ -23,8 +23,11 @@
   "responses": [
     {
       "method": "post",
-      "url": "http://foo.bar/bulk/records/0-0-0",
-      "res": {}
+      "url": "http://foo.bar/bulk/?unique=1&noop=0&merge=1&pOldNew=NEW&pActiveLibrary=FIN01&pCatalogerIn=LOAD_IMP&noStream=1",
+      "res": {
+        "correlationId": "0-0-0",
+        "queueItemState": "WAITING_FOR_RECORDS"
+      }
     }
   ]
 }
