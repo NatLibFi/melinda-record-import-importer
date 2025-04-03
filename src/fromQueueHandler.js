@@ -71,7 +71,7 @@ export async function collectRecordInfo({records, messages}, results = []) {
   const title = await getRecordTitle(record);
   const standardIdentifiers = await getRecordStandardIdentifiers(record);
   debug(`Record data to be sent to queue: Title: ${title}, identifiers: ${standardIdentifiers}`);
-  const recordObject = record.toObject();
+  const recordObject = JSON.stringify(record.toObject());
 
   return collectRecordInfo({records: restRecords, messages: restMessages}, [...results, {record: recordObject, message, metadata: {title, standardIdentifiers}}]);
 }
