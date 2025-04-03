@@ -21,7 +21,7 @@ export async function readFromQueue(mongoOperator, amqpOperator, melindaRestApiC
       const {noopProcessing} = importOptions;
 
       const results = await handleRecordStatus(amqpOperator, melindaRestApiClient, recordInfos, {correlationId, isAborted, noopProcessing});
-      debug(results);
+      // debug(results);
 
       await handleSkippedResults(results);
       return readFromQueue(mongoOperator, amqpOperator, melindaRestApiClient, {blobId, correlationId, pullState, importOptions});
