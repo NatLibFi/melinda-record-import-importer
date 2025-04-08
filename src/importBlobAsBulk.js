@@ -16,7 +16,7 @@ export default function (mongoOperator, amqpOperator, melindaRestApiClient, conf
       const {correlationId} = await mongoOperator.readBlob({id: blobId});
       debug(`Got queue item ${blobId}`);
       const messageCount = await amqpOperator.countQueue({blobId, status: pullState});
-      debug(`${messageCount} messages in queue ${blobId}.${pullState}`);
+      debug(`${messageCount} messages in queue ${pullState}.${blobId}`);
 
       const hasMessages = messageCount > 0;
       const hasCorrelationId = correlationId !== '';
