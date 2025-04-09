@@ -35,6 +35,19 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       //devDebug(`Found blob in state ${BLOB_STATE.PROCESSING_BULK}: ${JSON.stringify(resultStateBlobInfo)}`);
       const {id, correlationId} = resultStateBlobInfo;
       logger.info(`Found blob in state ${BLOB_STATE.PROCESSING_BULK} ${id}`);
+
+      if (correlationId === '') {
+        devDebug(`Blob ${id} did not have anything in queue, setting transformation failed`);
+        await mongoOperator.updateBlob({
+          id,
+          payload: {
+            op: BLOB_UPDATE_OPERATIONS.updateState,
+            state: BLOB_STATE.TRANSFORMATION_FAILED
+          }
+        });
+
+        return logic();
+      }
       devDebug(`Queuing to bulk blob ${id}`);
 
       await handleBulkResult(mongoOperator, melindaRestApiClient, {blobId: id, correlationId});
