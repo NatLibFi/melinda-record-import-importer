@@ -37,12 +37,12 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       logger.info(`Found blob in state ${BLOB_STATE.PROCESSING_BULK} ${id}`);
 
       if (correlationId === '') {
-        devDebug(`Blob ${id} did not have anything in queue, setting transformation failed`);
+        devDebug(`Blob ${id} did not have anything in amqp queue for import, setting transformation failed`);
         await mongoOperator.updateBlob({
           id,
           payload: {
-            op: BLOB_UPDATE_OPERATIONS.updateState,
-            state: BLOB_STATE.TRANSFORMATION_FAILED
+            op: BLOB_UPDATE_OPERATIONS.transformationFailed,
+            error: 'Blob did not have anything in amqp queue for import, setting transformation failed state'
           }
         });
 
