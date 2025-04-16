@@ -1,0 +1,24 @@
+{
+  "description": "Handle transformed blob - no messages => no correlationId => Return true",
+  "only": false,
+  "skip": false,
+  "configs": {
+    "blobId": "000",
+    "status": "TRANSFORMED",
+    "profileId": "foobar",
+    "amqpUrl": "amqp://foo.bar/",
+    "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
+    "logLevel": "info",
+    "pullState": "TRANSFORMED",
+    "importOptions": {
+      "profileToCataloger": "{\"foobar\": \"foobar\"}",
+      "noopProcessing": false,
+      "uniqueMelindaImport": true,
+      "noopMelindaImport": false,
+      "sendAsUpdate": false,
+      "mergeMelindaImport": true
+    }
+  },
+  "expectedReturnValue": true,
+  "responses": []
+}

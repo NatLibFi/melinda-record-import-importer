@@ -2,32 +2,48 @@
   "blobmetadatas": [
     {
       "processingInfo": {
-        "numberOfRecords": 1,
+        "numberOfRecords": 2,
         "failedRecords": [],
         "importResults": [
           {
             "metadata": {
-              "id": "001234567",
-              "message": "",
+              "id": "019253155",
+              "message": "Found 0 matching records in the database. - Created record 019253155.",
+              "recordStatusNote": "CREATED",
               "sourceIds": [
-                "(MALLI)0239734"
+                "(examp)0000826"
               ],
               "standardIdentifiers": [
-                "978-952-373-345-9"
+                "978-5-000-00000-x"
               ],
-              "title": "example"
+              "title": "Example title 1"
+            },
+            "status": "CREATED"
+          },
+          {
+            "metadata": {
+              "id": "019253156",
+              "message": "Found 0 matching records in the database. - Created record 019253156.",
+              "recordStatusNote": "CREATED",
+              "sourceIds": [
+                "(examp)0003398"
+              ],
+              "standardIdentifiers": [
+                "978-1-0000-0000-x"
+              ],
+              "title": "Example title 2"
             },
             "status": "CREATED"
           }
         ]
       },
       "id": "000",
-      "correlationId": "de9c748f-497d-4a60-a1da-6361aef55d69",
+      "correlationId": "0-0-0",
       "profile": "profile",
       "cataloger": "",
       "notificationEmail": "",
       "contentType": "application/json",
-      "state": "PROCESSED"
+      "state": "TRANSFORMED"
     }
   ]
 }

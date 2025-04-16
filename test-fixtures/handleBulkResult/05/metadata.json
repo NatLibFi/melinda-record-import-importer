@@ -2,29 +2,47 @@
   "description": "Handle ERROR record data",
   "only": false,
   "skip": false,
-  "requests": [
+  "responses": [
     {
-      "method": "post",
-      "url": "/auth",
-      "status": 204,
-      "responseHeaders": {
-        "Token": "0-0-0"
+      "method": "get",
+      "url": "http://foo.bar/bulk/state/0-0-0",
+      "res": {
+        "correlationId": "0-0-0",
+        "queueItemState": "DONE",
+        "modificationTime": "2025-01-01T01:00:01.282Z"
       }
     },
     {
       "method": "get",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
+      "url": "http://foo.bar/bulk/?correlationId=0-0-0&skip=0",
+      "res": [
+        {
+          "correlationId": "0-0-0",
+          "cataloger": "IMP_EXAMP",
+          "oCatalogerIn": "LOAD-EXA",
+          "operation": "CREATE",
+          "contentType": "application/json",
+          "queueItemState": "DONE",
+          "blobSize": 1,
+          "records": [
+            {
+              "recordStatus": "ERROR",
+              "databaseId": "001234567",
+              "message": "example",
+              "recordMetadata": {
+                "blobSequence": "1",
+                "standardIdentifiers": [
+                  "978-952-373-345-9"
+                ],
+                "sourceIds": [
+                  "(MALLI)0239734"
+                ],
+                "title": "example"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

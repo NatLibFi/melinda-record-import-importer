@@ -1,0 +1,44 @@
+{
+  "description": "Handle transformed blob - 0 messages => CorrelationId 0-0-0 => all records sent => Return true",
+  "only": false,
+  "skip": false,
+  "configs": {
+    "blobId": "000",
+    "status": "TRANSFORMED",
+    "profileId": "foobar",
+    "amqpUrl": "amqp://foo.bar/",
+    "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
+    "logLevel": "info",
+    "pullState": "TRANSFORMED",
+    "importOptions": {
+      "profileToCataloger": "{\"foobar\": \"foobar\"}",
+      "noopProcessing": false,
+      "uniqueMelindaImport": true,
+      "noopMelindaImport": false,
+      "sendAsUpdate": false,
+      "mergeMelindaImport": true
+    }
+  },
+  "expectedReturnValue": true,
+  "responses": [
+    {
+      "method": "get",
+      "url": "http://foo.bar/bulk/state/0-0-0",
+      "res": {
+        "correlationId": "0-0-0",
+        "queueItemState": "WAITING_FOR_RECORDS",
+        "modificationTime": "2025-01-01T01:00:01.282Z"
+      }
+    },
+    {
+      "method": "post",
+      "url": "http://foo.bar/bulk/record/0-0-0",
+      "res": {}
+    },
+    {
+      "method": "put",
+      "url": "http://foo.bar/bulk/state/0-0-0?status=PENDING_VALIDATION",
+      "res": {}
+    }
+  ]
+}

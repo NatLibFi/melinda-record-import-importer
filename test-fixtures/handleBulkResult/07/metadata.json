@@ -1,30 +1,52 @@
 {
-  "description": "Handle DUPLICATE record data",
+  "description": "Handle DUPLICATE record data (When only new ones are imported)",
   "only": false,
   "skip": false,
-  "requests": [
+  "responses": [
     {
-      "method": "post",
-      "url": "/auth",
-      "status": 204,
-      "responseHeaders": {
-        "Token": "0-0-0"
+      "method": "get",
+      "url": "http://foo.bar/bulk/state/0-0-0",
+      "res": {
+        "correlationId": "0-0-0",
+        "queueItemState": "DONE",
+        "modificationTime": "2025-01-01T01:00:01.282Z"
       }
     },
     {
       "method": "get",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
+      "url": "http://foo.bar/bulk/?correlationId=0-0-0&skip=0",
+      "res": [
+        {
+          "correlationId": "0-0-0",
+          "cataloger": "IMP_EXAMP",
+          "oCatalogerIn": "LOAD-EXA",
+          "operation": "CREATE",
+          "contentType": "application/json",
+          "queueItemState": "DONE",
+          "blobSize": 1,
+          "records": [
+            {
+              "databaseId": "000000000",
+              "recordMetadata": {
+                "sourceIds": [
+                  "(examp)00000"
+                ],
+                "blobSequence": 2,
+                "title": "Example title 1",
+                "standardIdentifiers": [
+                  "978-952-000-000-x"
+                ]
+              },
+              "recordStatus": "DUPLICATE",
+              "detailedRecordStatus": "DUPLICATE",
+              "message": "Duplicates in database",
+              "ids": [
+                "018202174"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

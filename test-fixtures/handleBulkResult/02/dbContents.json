@@ -2,12 +2,12 @@
   "blobmetadatas": [
     {
       "processingInfo": {
-        "numberOfRecords": 1,
+        "numberOfRecords": 2,
         "failedRecords": [],
         "importResults": []
       },
       "id": "000",
-      "correlationId": "de9c748f-497d-4a60-a1da-6361aef55d69",
+      "correlationId": "0-0-0",
       "profile": "profile",
       "cataloger": "",
       "notificationEmail": "",

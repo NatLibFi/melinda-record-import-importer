@@ -2,29 +2,64 @@
   "description": "Handle CREATE record data",
   "only": false,
   "skip": false,
-  "requests": [
+  "responses": [
     {
-      "method": "post",
-      "url": "/auth",
-      "status": 204,
-      "responseHeaders": {
-        "Token": "0-0-0"
+      "method": "get",
+      "url": "http://foo.bar/bulk/state/0-0-0",
+      "res": {
+        "correlationId": "0-0-0",
+        "queueItemState": "DONE",
+        "modificationTime": "2025-01-01T01:00:01.282Z"
       }
     },
     {
       "method": "get",
-      "url": "/blobs/000",
-      "status": 200
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
-    },
-    {
-      "method": "put",
-      "url": "/blobs/000",
-      "status": 204
+      "url": "http://foo.bar/bulk/?correlationId=0-0-0&skip=0",
+      "res": [
+        {
+          "correlationId": "0-0-0",
+          "cataloger": "IMP_EXAMP",
+          "oCatalogerIn": "LOAD-EXA",
+          "operation": "CREATE",
+          "contentType": "application/json",
+          "queueItemState": "DONE",
+          "blobSize": 2,
+          "records": [
+            {
+              "databaseId": "019253155",
+              "recordMetadata": {
+                "sourceIds": [
+                  "(examp)0000826"
+                ],
+                "blobSequence": 1,
+                "title": "Example title 1",
+                "standardIdentifiers": [
+                  "978-5-000-00000-x"
+                ]
+              },
+              "recordStatus": "CREATED",
+              "detailedRecordStatus": "CREATED",
+              "message": "Found 0 matching records in the database. - Created record 019253155."
+            },
+            {
+              "databaseId": "019253156",
+              "recordMetadata": {
+                "sourceIds": [
+                  "(examp)0003398"
+                ],
+                "blobSequence": 2,
+                "title": "Example title 2",
+                "standardIdentifiers": [
+                  "978-1-0000-0000-x"
+                ]
+              },
+              "recordStatus": "CREATED",
+              "detailedRecordStatus": "CREATED",
+              "message": "Found 0 matching records in the database. - Created record 019253156."
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -2,18 +2,17 @@
   "blobmetadatas": [
     {
       "processingInfo": {
-        "numberOfRecords": 2,
+        "numberOfRecords": 0,
         "failedRecords": [],
         "importResults": []
       },
       "id": "000",
-      "correlationId": "0-0-0",
+      "correlationId": "noop",
       "profile": "profile",
       "cataloger": "",
       "notificationEmail": "",
       "contentType": "application/json",
-      "state": "TRANSFORMED",
-      "modificationTime": "2024-07-31T05:50:55.000Z"
+      "state": "TRANSFORMED"
     }
   ]
 }

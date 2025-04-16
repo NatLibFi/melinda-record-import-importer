@@ -1,0 +1,24 @@
+{
+  "description": "Noop transformed blob - 2 messages => CorrelationId noop => Noop records => Return false",
+  "only": false,
+  "skip": false,
+  "configs": {
+    "blobId": "000",
+    "status": "TRANSFORMED",
+    "profileId": "foobar",
+    "amqpUrl": "amqp://foo.bar/",
+    "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
+    "logLevel": "info",
+    "pullState": "TRANSFORMED",
+    "importOptions": {
+      "profileToCataloger": "{\"foobar\": \"foobar\"}",
+      "noopProcessing": true,
+      "uniqueMelindaImport": true,
+      "noopMelindaImport": false,
+      "sendAsUpdate": false,
+      "mergeMelindaImport": true
+    }
+  },
+  "expectedReturnValue": false,
+  "responses": []
+}
