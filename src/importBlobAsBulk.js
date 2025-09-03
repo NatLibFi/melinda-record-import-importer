@@ -1,7 +1,7 @@
+import createDebugLogger from 'debug';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
 import {BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
-import createDebugLogger from 'debug';
-import {readFromQueue} from './fromQueueHandler';
+import {readFromQueue} from './fromQueueHandler.js';
 
 export default function (mongoOperator, amqpOperator, melindaRestApiClient, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importBlobAsBulk');

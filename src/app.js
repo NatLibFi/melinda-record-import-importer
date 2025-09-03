@@ -119,11 +119,11 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       }
 
       debug('Sending notification mail');
-      messageOptions.to = notificationEmail; // eslint-disable-line functional/immutable-data
+      messageOptions.to = notificationEmail;
       const importResults = processingInfo?.importResults || [];
       const parsedFailedRecords = failedRecordsCollector(processingInfo?.failedRecords);
       const recordInfo = [...importResults, ...parsedFailedRecords];
-      messageOptions.context = {recordInfo, blobId: id}; // eslint-disable-line functional/immutable-data
+      messageOptions.context = {recordInfo, blobId: id};
       return sendEmail({messageOptions, smtpConfig});
     }
 

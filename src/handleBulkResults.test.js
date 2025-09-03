@@ -1,18 +1,18 @@
-import {expect} from 'chai';
+import assert from 'node:assert';
+import nock from 'nock';
 
 import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen';
 import mongoFixturesFactory from '@natlibfi/fixura-mongo';
 import {createMongoBlobsOperator} from '@natlibfi/melinda-record-import-commons';
-import HttpRequestMock from 'http-request-mock';
 import {createMelindaApiRecordClient} from '@natlibfi/melinda-rest-api-client';
 
-import {handleBulkResult} from './handleBulkResult';
+import {handleBulkResult} from './handleBulkResult.js';
 
 import createDebugLogger from 'debug';
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:handleBulkResults:test');
-let mongoFixtures; // eslint-disable-line functional/no-let
-let mocker; // eslint-disable-line functional/no-let
+let mongoFixtures;
+
 const melindaRestApiClient = createMelindaApiRecordClient({
   melindaApiUrl: 'http://foo.bar',
   melindaApiUsername: 'foo',
@@ -21,35 +21,35 @@ const melindaRestApiClient = createMelindaApiRecordClient({
 
 generateTests({
   callback,
-  path: [__dirname, '..', 'test-fixtures', 'handleBulkResult'],
+  path: [import.meta.dirname, '..', 'test-fixtures', 'handleBulkResult'],
   recurse: false,
   useMetadataFile: true,
   fixura: {
     failWhenNotFound: true,
     reader: READERS.JSON
   },
-  mocha: {
+  hooks: {
     before: async () => {
       await initMongofixtures();
-      mocker = HttpRequestMock.setup();
+      nock.disableNetConnect();
     },
     beforeEach: async () => {
       await mongoFixtures.clear();
-      mocker.reset();
     },
     afterEach: async () => {
       await mongoFixtures.clear();
+      nock.cleanAll();
     },
     after: async () => {
       await mongoFixtures.close();
-      mocker = null;
+      nock.enableNetConnect();
     }
   }
 });
 
 async function initMongofixtures() {
   mongoFixtures = await mongoFixturesFactory({
-    rootPath: [__dirname, '..', 'test-fixtures', 'handleBulkResult'],
+    rootPath: [import.meta.dirname, '..', 'test-fixtures', 'handleBulkResult'],
     useObjectId: true
   });
 }
@@ -68,10 +68,11 @@ async function callback({
   const expectedOutputResults = getFixture('output.json');
 
   // Http request interceptions
-  if (responses.length > 0) { // eslint-disable-line functional/no-conditional-statements
-    const mockers = setupHttpMock(responses);
-    expect(mockers.length).to.eql(responses.length);
-    debug(`http mockers set ${mockers.length} / ${responses.length}`);
+  if (responses.length > 0) {
+    const scope = setupHttpNock(responses);
+    const pendingMocks = scope.pendingMocks();
+    debug('pending mocks ', pendingMocks);
+    assert.equal(pendingMocks.length, responses.length);
   }
 
   // debug(importResults);
@@ -79,9 +80,9 @@ async function callback({
   try {
     const handledRecords = await handleBulkResult(mongoOperator, melindaRestApiClient, {blobId: '000', correlationId: '0-0-0'});
     // debug(handledRecords);
-    expect(handledRecords).to.deep.equal(expectedOutputResults);
+    assert.deepStrictEqual(handledRecords, expectedOutputResults);
     const dump = dumpParser(await mongoFixtures.dump());
-    expect(dump).to.eql(expectedResults);
+    assert.deepStrictEqual(dump, expectedResults);
 
   } catch (error) {
     if (!expectedToFail) {
@@ -89,33 +90,47 @@ async function callback({
     }
 
     // console.log(error); // eslint-disable-line
-    expect(error.status).to.eql(expectedErrorStatus);
-    expect(error.payload).to.eql(expectedErrorMessage);
-    expect(expectedToFail).to.eql(true, 'This test is not suppose to fail!');
+    assert.equal(error.status, expectedErrorStatus);
+    assert.equal(error.payload, expectedErrorMessage);
+    assert.equal(expectedToFail, true, 'This test is not suppose to fail!');
   }
 
-  function setupHttpMock(responses) {
-    return responses.map(response => {
+  function setupHttpNock(responses) {
+    const scope = nock("http://foo.bar");
+    responses.forEach(response => {
       if (response.method === 'get') {
-        return mocker.get(response.url, response.res);
+        scope
+          .get(response.path)
+          .query(response.query)
+          .times(response.times)
+          .reply(200, response.res);
       }
 
       if (response.method === 'post') {
-        return mocker.post(response.url, response.res);
+        scope
+          .post(response.path)
+          .query(response.query)
+          .times(response.times)
+          .reply(200, response.res);
       }
 
       if (response.method === 'put') {
-        return mocker.put(response.url, response.res);
+        scope
+          .put(response.path)
+          .query(response.query)
+          .times(response.times)
+          .reply(200, response.res);
       }
-      return false;
-    }).filter(value => value);
+      return;
+    });
+    return scope;
   }
 
   function dumpParser(dump) {
     return {
       blobmetadatas: dump.blobmetadatas.map((blob, index) => {
         const {modificationTime, ...rest} = blob;
-        expect(modificationTime).not.to.eql(expectedResults.blobmetadatas[index].modificationTime);
+        assert.notEqual(modificationTime, expectedResults.blobmetadatas[index].modificationTime);
         return {...rest};
       })
     };

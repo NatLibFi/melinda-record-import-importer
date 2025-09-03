@@ -138,7 +138,6 @@ export async function handleBulkResult(mongoOperator, melindaRestApiClient, {blo
       recordStatusNote: detailedRecordStatus
     };
 
-    // eslint-disable-next-line functional/immutable-data
     Object.keys(metadata).forEach(key => metadata[key] === undefined && delete metadata[key]);
 
     if (ids) {

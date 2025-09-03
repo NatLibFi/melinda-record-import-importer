@@ -23,7 +23,9 @@
   "responses": [
     {
       "method": "post",
-      "url": "http://foo.bar/bulk/records/0-0-0",
+      "path": "/bulk/records/0-0-0",
+      "query": {},
+      "times": 2,
       "res": {}
     }
   ]
