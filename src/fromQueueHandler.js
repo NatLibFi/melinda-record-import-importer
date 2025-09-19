@@ -1,8 +1,8 @@
-import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons';
-import httpStatus from 'http-status';
-import {RECORD_IMPORT_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
-import {promisify} from 'util';
 import createDebugLogger from 'debug';
+import httpStatus from 'http-status';
+import {promisify} from 'util';
+import {getRecordTitle, getRecordStandardIdentifiers} from '@natlibfi/melinda-commons';
+import {RECORD_IMPORT_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 
 const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:fromQueueHandler');

@@ -3,7 +3,7 @@ import {parseBoolean} from '@natlibfi/melinda-commons';
 
 export const profileIds = readEnvironmentVariable('PROFILE_IDS', {format: v => JSON.parse(v)});
 export const amqpUrl = readEnvironmentVariable('AMQP_URL', {defaultValue: 'amqp://127.0.0.1:5672/'});
-export const mongoUrl = readEnvironmentVariable('MONGO_URI', {defaultValue: false});
+export const mongoUrl = readEnvironmentVariable('MONGO_URI', {defaultValue: 'mongodb://127.0.0.1:27017/db'});
 
 export const importOfflinePeriod = readEnvironmentVariable('IMPORT_OFFLINE_PERIOD', {defaultValue: '{"startHour":24, "lengthHours":0}'});
 

@@ -35,14 +35,13 @@
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^10.0.0-alpha.1",
-		"@natlibfi/melinda-backend-commons": "^3.0.0-alpha.6",
+		"@natlibfi/melinda-backend-commons": "^3.0.0-alpha.7",
 		"@natlibfi/melinda-commons": "^14.0.0-alpha.3",
 		"@natlibfi/melinda-record-import-commons": "^13.0.0-alpha.5",
 		"@natlibfi/melinda-rest-api-client": "^6.0.0-alpha.2",
 		"@natlibfi/melinda-rest-api-commons": "^5.0.0-alpha.3",
 		"amqplib": "^0.10.3",
-		"http-status": "^2.1.0",
-		"pretty-print-ms": "^1.0.5"
+		"http-status": "^2.1.0"
 	},
 	"devDependencies": {
 		"@natlibfi/fixugen": "^3.0.0-alpha.6",

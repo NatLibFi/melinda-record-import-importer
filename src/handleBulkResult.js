@@ -27,9 +27,9 @@
 //   "modificationTime": "2022-04-26T10:56:48.186Z"
 // }
 
-import {BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import createDebugLogger from 'debug';
 import {promisify} from 'util';
+import {BLOB_STATE, BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
 import {pollMelindaRestApi} from '@natlibfi/melinda-rest-api-client';
 

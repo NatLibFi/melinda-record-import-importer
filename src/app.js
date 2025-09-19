@@ -1,10 +1,9 @@
-import {BLOB_STATE, BLOB_UPDATE_OPERATIONS, getNextBlob} from '@natlibfi/melinda-record-import-commons';
 import {promisify} from 'util';
 import createDebugLogger from 'debug';
-import prettyPrint from 'pretty-print-ms';
-import {parseBlobInfo, failedRecordsCollector} from './utils';
-import {createWebhookOperator, sendEmail, createLogger} from '@natlibfi/melinda-backend-commons';
-import {handleBulkResult} from './handleBulkResult';
+import {createWebhookOperator, sendEmail, createLogger, millisecondsToString} from '@natlibfi/melinda-backend-commons';
+import {BLOB_STATE, BLOB_UPDATE_OPERATIONS, getNextBlob} from '@natlibfi/melinda-record-import-commons';
+import {handleBulkResult} from './handleBulkResult.js';
+import {parseBlobInfo, failedRecordsCollector} from './utils.js';
 
 export async function startApp(config, mongoOperator, melindaRestApiClient, blobImportHandler) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
@@ -145,7 +144,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
   function logWait(waitTime) {
     // 60000ms = 1min
     if (waitTime % 60000 === 0) {
-      return logger.info(`Total wait: ${prettyPrint(waitTime)}`);
+      return logger.info(`Total wait: ${millisecondsToString(waitTime)}`);
     }
   }
 }
