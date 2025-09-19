@@ -9,7 +9,8 @@ export const importOfflinePeriod = readEnvironmentVariable('IMPORT_OFFLINE_PERIO
 
 export const logLevel = readEnvironmentVariable('LOG_LEVEL', {defaultValue: 'info'});
 
-export const pullState = readEnvironmentVariable('PULL_STATE', {defaultValue: 'TRANSFORMED'});
+export const readFrom = readEnvironmentVariable('READ_FROM', {defaultValue: 'TRANSFORMED'});
+export const nextQueueStatus = readEnvironmentVariable('NEXT_QUEUE_STATUS', {defaultValue: 'PROCESSED'});
 
 export const importOptions = {
   profileToCataloger: readEnvironmentVariable('PROFILE_TO_CATALOGER', {format: v => JSON.parse(v)}),

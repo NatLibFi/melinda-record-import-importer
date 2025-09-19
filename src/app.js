@@ -13,8 +13,8 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
   const setTimeoutPromise = promisify(setTimeout);
   const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
   logger.info(`Starting melinda record import importer profile: ${config.profileIds}`);
-  const {pullState} = config;
-  if (BLOB_STATE[pullState] === undefined) {
+  const {readFrom, profileIds, importOfflinePeriod, nextQueueStatus} = config;
+  if (BLOB_STATE[readFrom] === undefined || BLOB_STATE[nextQueueStatus] === undefined) {
     throw new Error('Invalid state set!');
   }
   await logic();
@@ -27,7 +27,6 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       return logic(false, nowWaited);
     }
 
-    const {profileIds, importOfflinePeriod} = config;
 
     const resultStateBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: BLOB_STATE.PROCESSING_BULK, importOfflinePeriod});
     if (resultStateBlobInfo) {
@@ -56,7 +55,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
         id,
         payload: {
           op: BLOB_UPDATE_OPERATIONS.updateState,
-          state: BLOB_STATE.PROCESSED
+          state: BLOB_STATE[nextQueueStatus]
         }
       });
 
@@ -87,11 +86,11 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       return logic();
     }
 
-    const pullStateBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: pullState, importOfflinePeriod});
-    if (pullStateBlobInfo) {
-      devDebug(`Found blob in state ${pullState}: ${JSON.stringify(pullStateBlobInfo)}`);
-      const {id} = pullStateBlobInfo;
-      logger.info(`Found blob in state ${pullState} ${id}`);
+    const readStateBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: readFrom, importOfflinePeriod});
+    if (readStateBlobInfo) {
+      devDebug(`Found blob in state ${readFrom}: ${JSON.stringify(readStateBlobInfo)}`);
+      const {id} = readStateBlobInfo;
+      logger.info(`Found blob in state ${readFrom} ${id}`);
       await setTimeoutPromise(50); // Some time for records to get in queues
       devDebug(`Start handling blob ${id}`);
       await mongoOperator.updateBlob({

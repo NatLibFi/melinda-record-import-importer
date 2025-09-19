@@ -77,13 +77,13 @@ async function callback({
   try {
     debug('Connecting to amqplib');
     amqpOperator = await createAmqpOperator(amqplib, configs.amqpUrl);
-    const {blobId, pullState} = configs;
-    const amqpResponse = await amqpOperator.countQueue({blobId, status: pullState});
+    const {blobId, readFrom} = configs;
+    const amqpResponse = await amqpOperator.countQueue({blobId, status: readFrom});
     debug(`${amqpResponse}`);
 
     if (messages.length > 0) {
       debug(`Queuing ${messages.length} messages`);
-      const messagePromises = messages.map(message => amqpOperator.sendToQueue({blobId, status: pullState, data: message}));
+      const messagePromises = messages.map(message => amqpOperator.sendToQueue({blobId, status: readFrom, data: message}));
       await Promise.all(messagePromises);
     }
     // Http request interceptions

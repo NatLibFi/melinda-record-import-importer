@@ -8,8 +8,8 @@ const setTimeoutPromise = promisify(setTimeout);
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:fromQueueHandler');
 
 
-export async function readFromQueue(mongoOperator, amqpOperator, melindaRestApiClient, {blobId, correlationId, pullState, importOptions}) {
-  const chunk = await amqpOperator.getChunk({blobId, status: pullState});
+export async function readFromQueue(mongoOperator, amqpOperator, melindaRestApiClient, {blobId, correlationId, readFrom, importOptions}) {
+  const chunk = await amqpOperator.getChunk({blobId, status: readFrom});
   // debug(chunk);
 
   try {
@@ -24,7 +24,7 @@ export async function readFromQueue(mongoOperator, amqpOperator, melindaRestApiC
       // debug(results);
 
       await handleSkippedResults(results);
-      return readFromQueue(mongoOperator, amqpOperator, melindaRestApiClient, {blobId, correlationId, pullState, importOptions});
+      return readFromQueue(mongoOperator, amqpOperator, melindaRestApiClient, {blobId, correlationId, readFrom, importOptions});
     }
 
     return;

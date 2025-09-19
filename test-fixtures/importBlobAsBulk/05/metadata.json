@@ -9,7 +9,7 @@
     "amqpUrl": "amqp://foo.bar/",
     "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
     "logLevel": "info",
-    "pullState": "TRANSFORMED",
+    "readFrom": "TRANSFORMED",
     "importOptions": {
       "profileToCataloger": "{\"foobar\": \"foobar\"}",
       "noopProcessing": true,
