@@ -3,13 +3,14 @@ import {parseBoolean} from '@natlibfi/melinda-commons';
 
 export const profileIds = readEnvironmentVariable('PROFILE_IDS', {format: v => JSON.parse(v)});
 export const amqpUrl = readEnvironmentVariable('AMQP_URL', {defaultValue: 'amqp://127.0.0.1:5672/'});
-export const mongoUrl = readEnvironmentVariable('MONGO_URI', {defaultValue: false});
+export const mongoUrl = readEnvironmentVariable('MONGO_URI', {defaultValue: 'mongodb://127.0.0.1:27017/db'});
 
 export const importOfflinePeriod = readEnvironmentVariable('IMPORT_OFFLINE_PERIOD', {defaultValue: '{"startHour":24, "lengthHours":0}'});
 
 export const logLevel = readEnvironmentVariable('LOG_LEVEL', {defaultValue: 'info'});
 
-export const pullState = readEnvironmentVariable('PULL_STATE', {defaultValue: 'TRANSFORMED'});
+export const readFrom = readEnvironmentVariable('READ_FROM', {defaultValue: 'TRANSFORMED'});
+export const nextQueueStatus = readEnvironmentVariable('NEXT_QUEUE_STATUS', {defaultValue: 'PROCESSED'});
 
 export const importOptions = {
   profileToCataloger: readEnvironmentVariable('PROFILE_TO_CATALOGER', {format: v => JSON.parse(v)}),

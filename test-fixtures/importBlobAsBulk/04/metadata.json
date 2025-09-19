@@ -9,7 +9,7 @@
     "amqpUrl": "amqp://foo.bar/",
     "importOfflinePeriod": "{\"startHour\":22, \"lengthHours\":9}",
     "logLevel": "info",
-    "pullState": "TRANSFORMED",
+    "readFrom": "TRANSFORMED",
     "importOptions": {
       "profileToCataloger": "{\"foobar\": \"foobar\"}",
       "noopProcessing": false,
@@ -23,7 +23,9 @@
   "responses": [
     {
       "method": "post",
-      "url": "http://foo.bar/bulk/records/0-0-0",
+      "path": "/bulk/records/0-0-0",
+      "query": {},
+      "times": 2,
       "res": {}
     }
   ]

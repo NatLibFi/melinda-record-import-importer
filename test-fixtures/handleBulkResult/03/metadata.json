@@ -5,7 +5,9 @@
   "responses": [
     {
       "method": "get",
-      "url": "http://foo.bar/bulk/state/0-0-0",
+      "path": "/bulk/state/0-0-0",
+      "query": {},
+      "times": 1,
       "res": {
         "correlationId": "0-0-0",
         "queueItemState": "DONE",
@@ -14,7 +16,12 @@
     },
     {
       "method": "get",
-      "url": "http://foo.bar/bulk/?correlationId=0-0-0&skip=0",
+      "path": "/bulk/",
+      "query": {
+        "correlationId": "0-0-0",
+        "skip": 0
+      },
+      "times": 1,
       "res": [
         {
           "correlationId": "0-0-0",

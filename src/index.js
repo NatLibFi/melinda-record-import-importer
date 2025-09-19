@@ -1,10 +1,10 @@
+import amqplib from 'amqplib';
 import {handleInterrupt, createLogger} from '@natlibfi/melinda-backend-commons';
-import * as config from './config';
-import {startApp} from './app';
 import {createMongoBlobsOperator, createAmqpOperator} from '@natlibfi/melinda-record-import-commons';
 import {createMelindaApiRecordClient} from '@natlibfi/melinda-rest-api-client';
-import amqplib from 'amqplib';
-import importBlobHandlerFactory from './importBlobAsBulk';
+import {startApp} from './app.js';
+import * as config from './config.js';
+import importBlobHandlerFactory from './importBlobAsBulk.js';
 
 const logger = createLogger();
 run();
