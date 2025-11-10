@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-record-import-importer.git"
 	},
 	"license": "MIT",
-	"version": "1.0.7-alpha.1",
+	"version": "1.0.7",
 	"main": "./dist/index.js",
 	"type": "module",
 	"bin": "./dist/cli.js",
@@ -34,24 +34,24 @@
 		"dev:debug": "cross-env LOG_LEVEL=debug DEBUG=@natlibfi/* NODE_ENV=test npm run watch:test"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^10.0.0-alpha.1",
-		"@natlibfi/melinda-backend-commons": "^3.0.0-alpha.9",
-		"@natlibfi/melinda-commons": "^14.0.0-alpha.3",
-		"@natlibfi/melinda-record-import-commons": "^13.0.0-alpha.5",
-		"@natlibfi/melinda-rest-api-client": "^6.0.0-alpha.2",
-		"@natlibfi/melinda-rest-api-commons": "^5.0.0-alpha.3",
-		"amqplib": "^0.10.3",
+		"@natlibfi/marc-record": "^10.0.0",
+		"@natlibfi/melinda-backend-commons": "^3.0.0",
+		"@natlibfi/melinda-commons": "^14.0.0",
+		"@natlibfi/melinda-record-import-commons": "^13.0.0",
+		"@natlibfi/melinda-rest-api-client": "^6.0.0",
+		"@natlibfi/melinda-rest-api-commons": "^5.0.0",
+		"amqplib": "^0.10.9",
 		"http-status": "^2.1.0"
 	},
 	"devDependencies": {
-		"@natlibfi/fixugen": "^3.0.0-alpha.6",
-		"@natlibfi/fixugen-http-client": "^4.0.0-alpha.1",
-		"@natlibfi/fixura": "^4.0.0-alpha.13",
-		"@natlibfi/fixura-mongo": "^3.0.0-alpha.5",
+		"@natlibfi/fixugen": "^3.0.0",
+		"@natlibfi/fixugen-http-client": "^4.0.0",
+		"@natlibfi/fixura": "^4.0.0",
+		"@natlibfi/fixura-mongo": "^3.0.0",
 		"@onify/fake-amqplib": "^3.2.0",
-		"cross-env": "^7.0.3",
-		"esbuild": "^0.25.9",
-		"eslint": "^9.34.0",
+		"cross-env": "^10.1.0",
+		"esbuild": "^0.27.0",
+		"eslint": "^9.39.1",
 		"nock": "^14.0.10"
 	},
 	"overrides": {
