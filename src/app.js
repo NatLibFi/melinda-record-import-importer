@@ -1,10 +1,9 @@
-import {BLOB_STATE, BLOB_UPDATE_OPERATIONS, getNextBlob} from '@natlibfi/melinda-record-import-commons';
 import {promisify} from 'util';
 import createDebugLogger from 'debug';
-import prettyPrint from 'pretty-print-ms';
-import {parseBlobInfo, failedRecordsCollector} from './utils';
-import {createWebhookOperator, sendEmail, createLogger} from '@natlibfi/melinda-backend-commons';
-import {handleBulkResult} from './handleBulkResult';
+import {createWebhookOperator, sendEmail, createLogger, millisecondsToString} from '@natlibfi/melinda-backend-commons';
+import {BLOB_STATE, BLOB_UPDATE_OPERATIONS, getNextBlob} from '@natlibfi/melinda-record-import-commons';
+import {handleBulkResult} from './handleBulkResult.js';
+import {parseBlobInfo, failedRecordsCollector} from './utils.js';
 
 export async function startApp(config, mongoOperator, melindaRestApiClient, blobImportHandler) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:startApp');
@@ -14,8 +13,8 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
   const setTimeoutPromise = promisify(setTimeout);
   const webhookStatusOperator = createWebhookOperator(config.notifications.statusUrl);
   logger.info(`Starting melinda record import importer profile: ${config.profileIds}`);
-  const {pullState} = config;
-  if (BLOB_STATE[pullState] === undefined) {
+  const {readFrom, profileIds, importOfflinePeriod, nextQueueStatus} = config;
+  if (BLOB_STATE[readFrom] === undefined || BLOB_STATE[nextQueueStatus] === undefined) {
     throw new Error('Invalid state set!');
   }
   await logic();
@@ -28,7 +27,6 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       return logic(false, nowWaited);
     }
 
-    const {profileIds, importOfflinePeriod} = config;
 
     const resultStateBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: BLOB_STATE.PROCESSING_BULK, importOfflinePeriod});
     if (resultStateBlobInfo) {
@@ -57,7 +55,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
         id,
         payload: {
           op: BLOB_UPDATE_OPERATIONS.updateState,
-          state: BLOB_STATE.PROCESSED
+          state: BLOB_STATE[nextQueueStatus]
         }
       });
 
@@ -88,11 +86,11 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       return logic();
     }
 
-    const pullStateBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: pullState, importOfflinePeriod});
-    if (pullStateBlobInfo) {
-      devDebug(`Found blob in state ${pullState}: ${JSON.stringify(pullStateBlobInfo)}`);
-      const {id} = pullStateBlobInfo;
-      logger.info(`Found blob in state ${pullState} ${id}`);
+    const readStateBlobInfo = await getNextBlob(mongoOperator, {profileIds, state: readFrom, importOfflinePeriod});
+    if (readStateBlobInfo) {
+      devDebug(`Found blob in state ${readFrom}: ${JSON.stringify(readStateBlobInfo)}`);
+      const {id} = readStateBlobInfo;
+      logger.info(`Found blob in state ${readFrom} ${id}`);
       await setTimeoutPromise(50); // Some time for records to get in queues
       devDebug(`Start handling blob ${id}`);
       await mongoOperator.updateBlob({
@@ -119,11 +117,11 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
       }
 
       debug('Sending notification mail');
-      messageOptions.to = notificationEmail; // eslint-disable-line functional/immutable-data
+      messageOptions.to = notificationEmail;
       const importResults = processingInfo?.importResults || [];
       const parsedFailedRecords = failedRecordsCollector(processingInfo?.failedRecords);
       const recordInfo = [...importResults, ...parsedFailedRecords];
-      messageOptions.context = {recordInfo, blobId: id}; // eslint-disable-line functional/immutable-data
+      messageOptions.context = {recordInfo, blobId: id};
       return sendEmail({messageOptions, smtpConfig});
     }
 
@@ -145,7 +143,7 @@ export async function startApp(config, mongoOperator, melindaRestApiClient, blob
   function logWait(waitTime) {
     // 60000ms = 1min
     if (waitTime % 60000 === 0) {
-      return logger.info(`Total wait: ${prettyPrint(waitTime)}`);
+      return logger.info(`Total wait: ${millisecondsToString(waitTime)}`);
     }
   }
 }

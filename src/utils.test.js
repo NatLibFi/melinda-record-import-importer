@@ -1,15 +1,15 @@
-import {expect} from 'chai';
+import createDebugLogger from 'debug';
+import assert from 'node:assert';
 import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen';
-import createDebugLogger from 'debug';
-import {failedRecordsCollector} from './utils';
+import {failedRecordsCollector} from './utils.js';
 
 // eslint-disable-next-line no-unused-vars
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:utils:test');
 
 generateTests({
   callback,
-  path: [__dirname, '..', 'test-fixtures', 'utils'],
+  path: [import.meta.dirname, '..', 'test-fixtures', 'utils'],
   useMetadataFile: true,
   recurse: false,
   fixura: {
@@ -26,7 +26,7 @@ function callback({getFixture, method}) {
   if (method === 'failedRecordsCollector') {
     const result = failedRecordsCollector(failedRecords);
     // debug(result);
-    return expect(result).to.deep.equal(expectedResults);
+    return assert.deepStrictEqual(result, expectedResults);
   }
 
   throw Error('Invalid test method');

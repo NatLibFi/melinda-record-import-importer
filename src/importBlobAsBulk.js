@@ -1,13 +1,13 @@
+import createDebugLogger from 'debug';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
 import {BLOB_UPDATE_OPERATIONS} from '@natlibfi/melinda-record-import-commons';
-import createDebugLogger from 'debug';
-import {readFromQueue} from './fromQueueHandler';
+import {readFromQueue} from './fromQueueHandler.js';
 
 export default function (mongoOperator, amqpOperator, melindaRestApiClient, config) {
   const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importBlobAsBulk');
   const logger = createLogger(); // eslint-disable-line no-unused-vars
 
-  const {pullState, importOptions} = config;
+  const {readFrom, importOptions} = config;
   debug(`Import options: ${JSON.stringify(importOptions)}`);
   return {startHandling};
 
@@ -15,8 +15,8 @@ export default function (mongoOperator, amqpOperator, melindaRestApiClient, conf
     try {
       const {correlationId} = await mongoOperator.readBlob({id: blobId});
       debug(`Got queue item ${blobId}`);
-      const messageCount = await amqpOperator.countQueue({blobId, status: pullState});
-      debug(`${messageCount} messages in queue ${pullState}.${blobId}`);
+      const messageCount = await amqpOperator.countQueue({blobId, status: readFrom});
+      debug(`${messageCount} messages in queue ${readFrom}.${blobId}`);
 
       const hasMessages = messageCount > 0;
       const hasCorrelationId = correlationId !== '';
@@ -37,23 +37,23 @@ export default function (mongoOperator, amqpOperator, melindaRestApiClient, conf
         const {queueItemState} = await melindaRestApiClient.getBulkState(correlationId);
         if (queueItemState === 'WAITING_FOR_RECORDS') {
           await melindaRestApiClient.setBulkStatus(correlationId, 'PENDING_VALIDATION');
-          await amqpOperator.deleteQueue({blobId, status: pullState});
+          await amqpOperator.deleteQueue({blobId, status: readFrom});
           return true;
         }
 
-        await amqpOperator.deleteQueue({blobId, status: pullState});
+        await amqpOperator.deleteQueue({blobId, status: readFrom});
         return true;
       }
 
       // if 0 queued items => processed
       if (!hasMessages && !hasCorrelationId) {
-        await amqpOperator.deleteQueue({blobId, status: pullState});
+        await amqpOperator.deleteQueue({blobId, status: readFrom});
         logger.info('No records in queue => PROCESSED');
         return true;
       }
 
       debug(`Starting consuming records of blob ${blobId}. Sending ${messageCount} records to ${correlationId} bulk queue.`);
-      await readFromQueue(mongoOperator, amqpOperator, melindaRestApiClient, {blobId, correlationId, pullState, importOptions});
+      await readFromQueue(mongoOperator, amqpOperator, melindaRestApiClient, {blobId, correlationId, readFrom, importOptions});
       debug('Queued all messages.');
 
       return false;

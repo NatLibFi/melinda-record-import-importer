@@ -1,7 +1,7 @@
 import createDebugLogger from 'debug';
-import amqplib from '@onify/fake-amqplib';
-import {expect} from 'chai';
-import HttpRequestMock from 'http-request-mock';
+import assert from 'node:assert';
+import * as amqplib from '@onify/fake-amqplib';
+import nock from 'nock';
 
 import {READERS} from '@natlibfi/fixura';
 import generateTests from '@natlibfi/fixugen';
@@ -9,12 +9,12 @@ import mongoFixturesFactory from '@natlibfi/fixura-mongo';
 import {createMongoBlobsOperator, createAmqpOperator} from '@natlibfi/melinda-record-import-commons';
 import {createMelindaApiRecordClient} from '@natlibfi/melinda-rest-api-client';
 
-import blobImportHandlerFactory from './importBlobAsBulk';
+import blobImportHandlerFactory from './importBlobAsBulk.js';
 
 const debug = createDebugLogger('@natlibfi/melinda-record-import-importer:importBlobAsBulk:test');
 
-let mongoFixtures; // eslint-disable-line functional/no-let
-let amqpOperator; // eslint-disable-line functional/no-let
+let mongoFixtures;
+let amqpOperator;
 const melindaRestApiClient = createMelindaApiRecordClient({
   melindaApiUrl: 'http://foo.bar',
   melindaApiUsername: 'foo',
@@ -23,16 +23,17 @@ const melindaRestApiClient = createMelindaApiRecordClient({
 
 generateTests({
   callback,
-  path: [__dirname, '..', 'test-fixtures', 'importBlobAsBulk'],
+  path: [import.meta.dirname, '..', 'test-fixtures', 'importBlobAsBulk'],
   recurse: false,
   useMetadataFile: true,
   fixura: {
     failWhenNotFound: true,
     reader: READERS.JSON
   },
-  mocha: {
+  hooks: {
     before: async () => {
       await initMongofixtures();
+      nock.disableNetConnect();
     },
     beforeEach: async () => {
       await mongoFixtures.clear();
@@ -40,16 +41,18 @@ generateTests({
     afterEach: async () => {
       await mongoFixtures.clear();
       amqplib.resetMock();
+      nock.cleanAll();
     },
     after: async () => {
       await mongoFixtures.close();
+      nock.enableNetConnect();
     }
   }
 });
 
 async function initMongofixtures() {
   mongoFixtures = await mongoFixturesFactory({
-    rootPath: [__dirname, '..', 'test-fixtures', 'importTransformedBlobAsBulk'],
+    rootPath: [import.meta.dirname, '..', 'test-fixtures', 'importTransformedBlobAsBulk'],
     useObjectId: true
   });
 }
@@ -69,32 +72,33 @@ async function callback({
 
   const expectedResults = await getFixture('expectedResult.json');
   const messages = getFixture('messages.json');
-  const mocker = HttpRequestMock.setup();
 
   // Messages to AMQP queue
   try {
     debug('Connecting to amqplib');
     amqpOperator = await createAmqpOperator(amqplib, configs.amqpUrl);
-    const {blobId, pullState} = configs;
-    const amqpResponse = await amqpOperator.countQueue({blobId, status: pullState});
+    const {blobId, readFrom} = configs;
+    const amqpResponse = await amqpOperator.countQueue({blobId, status: readFrom});
     debug(`${amqpResponse}`);
 
-    if (messages.length > 0) { // eslint-disable-line functional/no-conditional-statements
+    if (messages.length > 0) {
       debug(`Queuing ${messages.length} messages`);
-      const messagePromises = messages.map(message => amqpOperator.sendToQueue({blobId, status: pullState, data: message}));
+      const messagePromises = messages.map(message => amqpOperator.sendToQueue({blobId, status: readFrom, data: message}));
       await Promise.all(messagePromises);
     }
     // Http request interceptions
-    if (responses.length > 0) { // eslint-disable-line functional/no-conditional-statements
-      const mockers = setupHttpMock(responses);
-      expect(mockers.length).to.eql(responses.length);
+    if (responses.length > 0) {
+      const scope = setupHttpNock(responses);
+      const pendingMocks = scope.pendingMocks();
+      debug('pending mocks ', pendingMocks);
+      assert.equal(pendingMocks.length, responses.length);
     }
 
     const blobImportHandler = blobImportHandlerFactory(mongoOperator, amqpOperator, melindaRestApiClient, configs);
     const returnValue = await blobImportHandler.startHandling(configs.blobId);
     const dump = dumpParser(await mongoFixtures.dump());
-    expect(returnValue).to.eql(expectedReturnValue);
-    expect(dump).to.eql(expectedResults);
+    assert.equal(returnValue, expectedReturnValue);
+    assert.deepStrictEqual(dump, expectedResults);
   } catch (error) {
     if (!expectedToFail) {
       console.log(error); // eslint-disable-line
@@ -102,33 +106,47 @@ async function callback({
     }
 
     // console.log(error); // eslint-disable-line
-    expect(error.status).to.eql(expectedErrorStatus);
-    expect(error.payload).to.eql(expectedErrorMessage);
-    expect(expectedToFail).to.eql(true, 'This test is not suppose to fail!');
+    assert.equal(error.status, expectedErrorStatus);
+    assert.equal(error.payload, expectedErrorMessage);
+    assert.equal(expectedToFail, true, 'This test is not suppose to fail!');
   }
 
-  function setupHttpMock(responses) {
-    return responses.map(response => {
+  function setupHttpNock(responses) {
+    const scope = nock("http://foo.bar");
+    responses.forEach(response => {
       if (response.method === 'get') {
-        return mocker.get(response.url, response.res);
+        scope
+          .get(response.path)
+          .query(response.query)
+          .times(response.times)
+          .reply(200, response.res);
       }
 
       if (response.method === 'post') {
-        return mocker.post(response.url, response.res);
+        scope
+          .post(response.path)
+          .query(response.query)
+          .times(response.times)
+          .reply(200, response.res);
       }
 
       if (response.method === 'put') {
-        return mocker.put(response.url, response.res);
+        scope
+          .put(response.path)
+          .query(response.query)
+          .times(response.times)
+          .reply(200, response.res);
       }
-      return false;
-    }).filter(value => value);
+      return;
+    });
+    return scope;
   }
 
   function dumpParser(dump) {
     return {
       blobmetadatas: dump.blobmetadatas.map((blob, index) => {
         const {modificationTime, ...rest} = blob;
-        expect(modificationTime).not.to.eql(expectedResults.blobmetadatas[index].modificationTime);
+        assert.notEqual(modificationTime, expectedResults.blobmetadatas[index].modificationTime);
         return {...rest};
       })
     };
