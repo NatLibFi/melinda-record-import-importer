@@ -33,6 +33,6 @@ Record importer for the Melinda record batch import system.
 
 ## License and copyright
 
-Copyright (c) 2019-2023 **University Of Helsinki (The National Library Of Finland)**
+Copyright (c) 2019-2023, 2026 **University Of Helsinki (The National Library Of Finland)**
 
 [MIT](https://choosealicense.com/licenses/mit/)
