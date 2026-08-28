@@ -34,12 +34,12 @@
 		"dev:debug": "cross-env LOG_LEVEL=debug DEBUG=@natlibfi/* NODE_ENV=test npm run watch:test"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^10.0.1",
+		"@natlibfi/marc-record": "^11.0.3",
 		"@natlibfi/melinda-backend-commons": "^3.0.5",
-		"@natlibfi/melinda-commons": "^14.0.2",
+		"@natlibfi/melinda-commons": "^15.0.2",
 		"@natlibfi/melinda-record-import-commons": "^13.0.3",
 		"@natlibfi/melinda-rest-api-client": "^6.0.3",
-		"@natlibfi/melinda-rest-api-commons": "^5.0.6",
+		"@natlibfi/melinda-rest-api-commons": "^6.0.1",
 		"amqplib": "^1.0.2",
 		"debug": "^4.4.3",
 		"http-status": "^2.1.0"
@@ -49,11 +49,11 @@
 		"@natlibfi/fixugen-http-client": "^4.0.3",
 		"@natlibfi/fixura": "^4.0.1",
 		"@natlibfi/fixura-mongo": "^3.0.3",
-		"@onify/fake-amqplib": "^3.4.0",
+		"@onify/fake-amqplib": "^3.6.0",
 		"cross-env": "^10.1.0",
-		"esbuild": "^0.27.4",
-		"eslint": "^10.1.0",
-		"nock": "^14.0.11"
+		"esbuild": "^0.28.2",
+		"eslint": "^10.9.1",
+		"nock": "^14.0.17"
 	},
 	"overrides": {
 		"nanoid": "^3.3.8"
